@@ -1,10 +1,11 @@
-- menu "模型与推理等级":
-  - group "DeepSeek":
-    - text: DeepSeek
-    - menuitemradio "Messages Flash" [checked]
-    - menuitemradio "DeepSeek-V4-Pro"
-  - group "推理等级":
-    - text: 推理等级
+- group "模型与推理等级":
+  - menu "模型":
+    - group "DeepSeek":
+      - text: DeepSeek
+      - menuitemradio "Messages Flash" [checked]
+      - menuitemradio "DeepSeek-V4-Pro"
+  - text: 推理等级
+  - menu "推理等级":
     - menuitemradio "Off"
     - menuitemradio "Low"
     - menuitemradio "High" [checked]

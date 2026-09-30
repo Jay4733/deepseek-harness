@@ -79,7 +79,11 @@ describe.skipIf(webSnapshotMode() === 'record')('web e2e: DeepSeek Messages sett
     await page.getByRole('button', { name: /^选择模型/ }).click()
     await page.getByRole('menuitemradio', { name: 'Messages Flash', exact: true }).waitFor()
     await compareOrRefreshGolden(join(EXPECTED, 'picker.expected.md'),
-      await captureStableAria(page, '[role="menu"]', scaffold.workspaceCwd), webSnapshotMode())
+      await captureStableAria(page, '[role="group"][aria-label="模型与推理等级"]', scaffold.workspaceCwd), webSnapshotMode())
+    const effortWeights = await page.getByRole('menu', { name: '推理等级' }).getByRole('menuitemradio')
+      .evaluateAll(rows => rows.map(row => getComputedStyle(row.querySelector('span')!).fontWeight))
+    expect(new Set(effortWeights)).toEqual(new Set(['400']))
+    await page.keyboard.press('Escape')
     expect(tripwire.pageErrors).toEqual([])
   }, 60_000)
 
