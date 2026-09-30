@@ -1,6 +1,17 @@
-/* Idle microphone: a Send-sized circle on the fixed success-green pair, so it reads the same under every palette. */
-.trigger { width: 34px; height: 34px; padding: 0; flex: none; border-radius: 50%; corner-shape: round; background: var(--dsw-alias-button-success-fill); color: var(--dsw-alias-button-success-label); transition: background-color 100ms ease; }
-.trigger:hover:not(:disabled) { background: var(--dsw-alias-button-success-hover); }
+/* Microphone seat: Send's size, accent fill, label and glow, so it follows the active palette. Recording turns it red with a pulsing ring; the request for microphone access shows the red without the pulse. */
+.trigger { width: 34px; height: 34px; padding: 0; flex: none; border-radius: 50%; corner-shape: round; background: var(--dsw-alias-button-info-fill); color: var(--dsw-alias-button-info-label); transition: background-color 100ms ease, box-shadow 160ms ease; }
+.trigger:not(:disabled) { box-shadow: 0 4px 14px -4px var(--dsw-alias-accent-glow); }
+.trigger:hover:not(:disabled) { background: var(--dsw-alias-button-info-hover); box-shadow: 0 6px 18px -4px var(--dsw-alias-accent-glow); }
+.recording, .recording:hover:not(:disabled) { background: var(--dsw-static-red-500); color: var(--dsw-static-neutral-00); }
+.recording:disabled { opacity: 1; cursor: default; }
+.recording:not(:disabled) { animation: voice-recording-pulse 1.4s ease-out infinite; }
+@keyframes voice-recording-pulse {
+  from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--dsw-static-red-500) 55%, transparent); }
+  to { box-shadow: 0 0 0 12px color-mix(in srgb, var(--dsw-static-red-500) 0%, transparent); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .recording:not(:disabled) { animation: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--dsw-static-red-500) 35%, transparent); }
+}
 .triggerAnchor { display: inline-flex; flex: none; }
 .captureRow { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; min-height: 34px; }
 .roundButton { width: 32px; height: 32px; padding: 0; border-radius: 50%; corner-shape: round; flex: none; background: var(--dsw-specific-selector); }

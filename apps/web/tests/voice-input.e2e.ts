@@ -134,6 +134,9 @@ it.skipIf(webSnapshotMode() === 'record')('guides voice setup, records from stan
   expect(micBox!.x + micBox!.width / 2).toBeCloseTo(sendBox!.x + sendBox!.width / 2, 0)
   expect(micBox!.width).toBe(sendBox!.width)
   expect(sendBox!.y - (micBox!.y + micBox!.height)).toBeCloseTo(8, 0)
+  // The idle microphone takes Send's palette accent fill.
+  const fill = (element: Element) => getComputedStyle(element).backgroundColor
+  expect(await mic.evaluate(fill)).toBe(await page.getByRole('button', { name: 'Send message', exact: true }).evaluate(fill))
   await input.fill(prefix)
   await mic.click()
   await page.getByRole('button', { name: 'Stop and transcribe', exact: true }).waitFor()
@@ -178,7 +181,9 @@ it.skipIf(webSnapshotMode() === 'record')('guides voice setup, records from stan
   }
   await input.hover()
   expect(await meter.isVisible()).toBe(false)
-  expect(await stop.evaluate(element => getComputedStyle(element).backgroundColor)).toBe(controlBackground)
+  // Recording turns the seated microphone red with a pulsing ring; Cancel keeps the control fill.
+  expect(await stop.evaluate(element => getComputedStyle(element).backgroundColor)).toBe('rgb(239, 68, 68)')
+  expect(await stop.evaluate(element => getComputedStyle(element).animationName)).not.toBe('none')
   expect(await page.getByRole('button', { name: 'Cancel', exact: true })
     .evaluate(element => getComputedStyle(element).backgroundColor)).toBe(controlBackground)
   await page.keyboard.press('Escape')

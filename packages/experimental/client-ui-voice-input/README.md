@@ -9,7 +9,7 @@ English | [中文](README.zh.md)
 
 ## Summary
 
-This optional browser plugin adds a green microphone button stacked above Send. When recognition is ready, clicking it opens a recording toolbar with measured audio levels, Cancel and Stop. The waveform stays shorter than the recording buttons. Stopping transcribes into the draft. Recognition preferences and model preparation live in plugin settings; language choices come from the selected provider.
+This optional browser plugin adds a microphone button stacked above Send that takes Send's palette accent. When recognition is ready, clicking it starts recording: the button turns red with a pulsing ring, and the toolbar shows measured audio levels and Cancel. The waveform stays shorter than the toolbar buttons. Clicking the red button again stops and transcribes into the draft. Recognition preferences and model preparation live in plugin settings; language choices come from the selected provider.
 
 ## Table of Contents
 

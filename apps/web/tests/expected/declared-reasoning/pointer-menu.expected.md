@@ -1,14 +1,17 @@
-- menu "模型与推理等级":
-  - group "DeepSeek":
-    - text: DeepSeek
-    - menuitemradio "DeepSeek-V4-Flash"
-    - menuitemradio "DeepSeek-V4-Flash-Vision-Exp"
-  - group "Acme Gateway":
-    - text: Acme Gateway
-    - menuitemradio "Acme Think"
-    - menuitemradio "Acme Swift" [checked]
-  - group "推理等级":
-    - text: 推理等级
+- group "模型与推理等级":
+  - searchbox "搜索模型…"
+  - menu "模型":
+    - group "DeepSeek":
+      - text: DeepSeek
+      - menuitemradio "DeepSeek-V4-Flash"
+      - menuitemradio "DeepSeek-V4-Flash-Vision-Exp"
+    - group "Acme Gateway":
+      - text: Acme Gateway
+      - menuitemradio "Acme Think"
+      - menuitemradio "Acme Swift" [checked]
+      - menuitemradio "Acme Lite"
+  - text: 推理等级
+  - menu "推理等级":
     - menuitemradio "Default"
     - menuitemradio "Off"
     - menuitemradio "High"

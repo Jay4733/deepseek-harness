@@ -323,7 +323,7 @@
      wrapped line; on a single line space-between already pins it right. */
   margin-left: auto;
   gap: 12px;
-  /* Anchors the idle activity control above Send (.activity). */
+  /* Anchors the seated activity control above Send ([data-composer-seat]). */
   position: relative;
 }
 
@@ -442,11 +442,13 @@
 .standardControls { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .tools[hidden], .standardControls[hidden] { display: none; }
 .trailingActive { flex: 1; margin-left: 0; }
-/* The idle activity control stacks 8px above Send in the card's right column
-   and shares Send's 2px lift; the docked 36px draft floor leaves room for a
-   34px control. While it is present the draft scrollport ends before that
-   column. An expanded activity returns to the row (.activityExpanded). */
-.activity { display: flex; align-items: center; flex: none; position: absolute; right: 0; bottom: calc(100% + 8px); transform: translateY(-2px); }
-.activity:empty { display: none; }
-.card:has(.activity:not(:empty)) .scroll { margin-right: 46px; }
+/* Other activity content sits in the row before Send; an expanded activity
+   takes the row width. */
+.activity { display: contents; }
+/* An activity control marked data-composer-seat stacks 8px above Send in the
+   card's right column, idle or expanded, and shares Send's 2px lift; the
+   docked 36px draft floor leaves room for a 34px control. While one is present
+   the draft scrollport ends before that column. */
+.trailing [data-composer-seat] { position: absolute; right: 0; bottom: calc(100% + 8px); transform: translateY(-2px); }
+.card:has([data-composer-seat]) .scroll { margin-right: 46px; }
 .activityExpanded { flex: 1; min-width: 0; }

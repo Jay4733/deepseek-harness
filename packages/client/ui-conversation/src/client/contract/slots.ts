@@ -201,7 +201,10 @@ declare module '@deepseek-ai/dsh-client-ui-slots' {
     'conversation.input.left': { kind: 'list'; scope: 'session' }
     /** Compact controls before the composer submit action. */
     'conversation.input.right': { kind: 'list'; scope: 'session' }
-    /** Compact action stacked above the submit action; it can expand across the toolbar while retaining the editor and submit action. */
+    /**
+     * Compact action; its element marked `data-composer-seat` stacks above the submit action, and the
+     * activity can expand across the toolbar while retaining the editor and submit action.
+     */
     'conversation.input.activity': { kind: 'single'; scope: 'session'; owner: InputActivityOwnerProps }
     /** Resident composer body, including the no-Session inert state. */
     'conversation.composer.bar': { kind: 'single'; scope: 'session-maybe'; owner: ComposerBarOwnerProps }
