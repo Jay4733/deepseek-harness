@@ -49,17 +49,14 @@
   white-space: nowrap;
 }
 
-/* Effort value beside the model name (mock's 'High': same 13/20/400, caption
-   tone). Adaptive priority: the huge shrink factor makes the effort absorb
-   all deficit first — it ellipsizes away to nothing before the model name
-   loses a single pixel, and the chevron stays snug throughout. */
+/* Effort value beside the model name (same 13/20/400) in the palette's
+   text-safe accent (the link token). Effort names are short, so the effort
+   never shrinks: a long model name ellipsizes first and the chevron stays
+   snug throughout. */
 .triggerEffort {
-  flex-shrink: 1000;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: none;
   white-space: nowrap;
-  color: var(--dsw-alias-label-caption);
+  color: var(--dsw-alias-link);
 }
 
 /* The Models glyph replaces the text when the composer row cannot fit it. */

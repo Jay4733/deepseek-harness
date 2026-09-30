@@ -10,7 +10,7 @@ import type { SpeechReadiness } from './readiness.ts'
 import { Waveform } from './Waveform.tsx'
 import { VoiceSetupDialog } from './VoiceSetupDialog.tsx'
 import { NS } from './locales.ts'
-import { Button, IconCloseOutlineRegular, IconStopFillRegular, IconMicrophoneOutlineRegular, StateDot, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
+import { Button, IconCloseOutlineRegular, IconMicrophoneOutlineRegular, StateDot, Tooltip } from '@deepseek-ai/dsh-client-ui-primitives'
 import css from './VoiceInput.module.css'
 
 /** Host calls injected without exposing a Cordis Context to React. */
@@ -142,32 +142,37 @@ export function VoiceInput({ sessionId, inputActions, locked, onActiveChange,
       if (run === generation.current) { current.current = undefined; feedback(failureText(failure)) }
     }
   }
-  if (!expanded) return <>
-    <Tooltip label={t('dictate')} disabled={!usable} side="top" portal>
-      <span className={css.triggerAnchor}><Button className={css.trigger} size="sm" disabled={locked}
-        aria-label={t(usable ? 'start' : 'setupPrompt.trigger')} aria-haspopup={usable ? undefined : 'dialog'}
-        onMouseDown={(event) => { event.preventDefault() }}
-        onClick={() => { if (usable) void start(); else setSetupOpen(true) }}><IconMicrophoneOutlineRegular size={18} /></Button></span>
+  const busy = phase === 'requesting' || phase === 'transcribing'
+  const busyLabel = t(phase === 'requesting' ? 'requesting'
+    : provider?.preparation.phase === 'waking' ? 'wakingShort' : 'transcribingShort')
+  // The seat keeps one element across phases, so keyboard focus survives the
+  // switch from start to stop; the composer seats it above Send.
+  return <>
+    {expanded && <div className={css.captureRow} data-voice-activity={phase}>
+      <Button type="button" className={css.roundButton} size="sm" aria-label={t(pending ? 'discard' : 'cancel')}
+        onClick={cancel}><IconCloseOutlineRegular size={14} /></Button>
+      {phase === 'recording' ? <Waveform recording={current.current?.capture} label={t('recording')} />
+        : <span className={css.activityMessage} role="status" title={pending || message}>
+          {busy && <StateDot state="ongoing" />}
+          {phase === 'feedback' ? message : busyLabel}</span>}
+      {pending && <Button className={css.inlineAction} size="sm" type="button" onClick={() => {
+        if (inputActions.insertText(pending, inputActions.captureInsertion())) { setPending(''); setPhase('idle') }
+      }}>{t('insert')}</Button>}
+    </div>}
+    <Tooltip label={t(phase === 'recording' ? 'stop' : 'dictate')} disabled={!usable || busy} side="top" portal>
+      <span className={css.triggerAnchor} data-composer-seat="">
+        <Button className={phase === 'requesting' || phase === 'recording' ? `${css.trigger} ${css.recording}` : css.trigger} size="sm"
+          disabled={phase !== 'recording' && (busy || locked)} data-recording={phase === 'recording' ? '' : undefined}
+          aria-label={phase === 'recording' ? t('stop') : busy ? busyLabel
+            : !usable ? t('setupPrompt.trigger') : t(phase === 'feedback' ? 'retryRecording' : 'start')}
+          aria-haspopup={usable ? undefined : 'dialog'}
+          onMouseDown={(event) => { event.preventDefault() }}
+          onClick={() => { if (phase === 'recording') void finish(); else if (usable) void start(); else setSetupOpen(true) }}>
+          <IconMicrophoneOutlineRegular size={18} /></Button>
+      </span>
     </Tooltip>
     <VoiceSetupDialog open={setupOpen && !usable}
       needsInstallation={readiness.connected && provider?.location === 'host-local' && provider.preparation.phase === 'unprepared'}
       onDismiss={() => { setSetupOpen(false) }} onOpenDetails={() => { setSetupOpen(false); openSettings() }} t={t} />
   </>
-  return <div className={css.captureRow} data-voice-activity={phase}>
-    <Button type="button" className={css.roundButton} size="sm" aria-label={t(pending ? 'discard' : 'cancel')}
-      onClick={cancel}><IconCloseOutlineRegular size={14} /></Button>
-    {phase === 'recording' ? <Waveform recording={current.current?.capture} label={t('recording')} />
-      : <span className={css.activityMessage} role="status" title={pending || message}>
-        {(phase === 'requesting' || phase === 'transcribing') && <StateDot state="ongoing" />}
-        {phase === 'feedback' ? message : t(phase === 'requesting' ? 'requesting'
-          : provider?.preparation.phase === 'waking' ? 'wakingShort' : 'transcribingShort')}</span>}
-    {phase === 'recording' && <Button type="button" className={css.roundButton} size="sm" aria-label={t('stop')}
-      onClick={() => { void finish() }}><IconStopFillRegular size={14} /></Button>}
-    {phase === 'feedback' && (pending
-      ? <Button className={css.inlineAction} size="sm" type="button" onClick={() => {
-        if (inputActions.insertText(pending, inputActions.captureInsertion())) { setPending(''); setPhase('idle') }
-      }}>{t('insert')}</Button>
-      : <Button className={css.roundButton} size="sm" type="button" aria-label={t('retryRecording')} disabled={!usable || locked}
-        onClick={() => { void start() }}><IconMicrophoneOutlineRegular size={18} /></Button>)}
-  </div>
 }

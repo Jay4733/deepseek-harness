@@ -39,7 +39,7 @@ Mouse selection uses native browser clicks, including their cancellation behavio
 
 Models stay grouped by provider. The composer menu shows model and effort names only, with DeepSeek Account first and DeepSeek second; third-party providers retain their catalog order. The effort segments share one track whose checked segment is raised, the treatment of the ui-primitives segmented control. The `/model` popup shows provider names and catalog descriptions; it localizes the two built-in DeepSeek descriptions and leaves external provider descriptions verbatim. The popup applies the selected model's default effort; the composer can then choose any advertised effort. An adapter without reasoning metadata leaves the effort segments absent; there is no arbitrary effort input.
 
-The composer replaces the model and effort text with the Models icon when the expanded controls cannot share one line, and restores the text when space permits. The full selection remains available in the trigger's accessible name, tooltip, and menu.
+The composer trigger shows the effective effort after the model name in the palette's accent text color; a long model name ellipsizes before the effort does. The composer replaces the model and effort text with the Models icon when the expanded controls cannot share one line, and restores the text when space permits. The full selection remains available in the trigger's accessible name, tooltip, and menu.
 
 ### Unroutable sessions
 

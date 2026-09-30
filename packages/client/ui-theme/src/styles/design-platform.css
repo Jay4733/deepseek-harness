@@ -36,8 +36,6 @@ body {
   --dsw-static-green-500: rgb(34, 197, 94);
   --dsw-static-green-500-a08: rgb(34 197 94 / 8%);
   --dsw-static-green-500-a12: rgb(34 197 94 / 12%);
-  --dsw-static-green-600: rgb(30, 158, 84);
-  --dsw-static-green-700: rgb(24, 136, 72);
   --dsw-static-green-900: rgb(35, 60, 44);
   --dsw-static-neutral-00: rgb(255, 255, 255);
   --dsw-static-neutral-1000: rgb(0, 0, 0);
@@ -119,8 +117,6 @@ body[data-ds-dark-theme] {
   --dsw-static-green-500: rgb(34, 197, 94);
   --dsw-static-green-500-a08: rgb(34 197 94 / 8%);
   --dsw-static-green-500-a12: rgb(34 197 94 / 12%);
-  --dsw-static-green-600: rgb(30, 158, 84);
-  --dsw-static-green-700: rgb(24, 136, 72);
   --dsw-static-green-900: rgb(35, 60, 44);
   --dsw-static-neutral-00: rgb(255, 255, 255);
   --dsw-static-neutral-1000: rgb(0, 0, 0);
@@ -205,9 +201,6 @@ body {
   --dsw-alias-button-info-fill: var(--dsw-static-deepseek-500);
   --dsw-alias-button-info-hover: var(--dsw-static-deepseek-400);
   --dsw-alias-button-info-label: var(--dsw-static-neutral-00);
-  --dsw-alias-button-success-fill: var(--dsw-static-green-600);
-  --dsw-alias-button-success-hover: var(--dsw-static-green-700);
-  --dsw-alias-button-success-label: var(--dsw-static-neutral-00);
   --dsw-alias-button-primary-dimmed: var(--dsw-static-neutral-bluish-100);
   --dsw-alias-button-primary-fill: var(--dsw-alias-brand-primary);
   --dsw-alias-button-primary-hover: var(--dsw-static-neutral-bluish-750);
@@ -321,9 +314,6 @@ body[data-ds-dark-theme] {
   --dsw-alias-button-info-fill: var(--dsw-static-deepseek-400);
   --dsw-alias-button-info-hover: var(--dsw-static-deepseek-500);
   --dsw-alias-button-info-label: var(--dsw-static-neutral-00);
-  --dsw-alias-button-success-fill: var(--dsw-static-green-600);
-  --dsw-alias-button-success-hover: var(--dsw-static-green-700);
-  --dsw-alias-button-success-label: var(--dsw-static-neutral-00);
   --dsw-alias-button-primary-dimmed: var(--dsw-static-neutral-bluish-750);
   --dsw-alias-button-primary-fill: var(--dsw-alias-brand-primary);
   --dsw-alias-button-primary-hover: var(--dsw-static-neutral-bluish-100);
