@@ -24,16 +24,18 @@ import { createAppearanceRowStore, createFontSizeRowStore } from './settings-sto
 import { installThemeStyles } from './styles.ts'
 import { en, zh, type ThemeKey } from './locales.ts'
 import {
-  DEFAULT_FONT_SIZE, DEFAULT_PREFERENCE, FONT_SIZE_FIELD, FONT_SIZE_MAX, FONT_SIZE_MIN,
-  isThemePreference, THEME_PREFERENCE_FIELD, THEME_SETTINGS_NAMESPACE,
-  type ThemePreference, type ThemeSettings,
+  DEFAULT_FONT_SIZE, DEFAULT_PALETTE, DEFAULT_PREFERENCE, FONT_SIZE_FIELD, FONT_SIZE_MAX, FONT_SIZE_MIN,
+  isThemePalette, isThemePreference, PALETTE_FIELD, paletteScheme, THEME_PREFERENCE_FIELD,
+  THEME_SETTINGS_NAMESPACE,
+  type ColorScheme, type ThemePalette, type ThemePreference, type ThemeSettings,
 } from '../theme-settings.ts'
 
 export type { AppearanceRowComponentProps, AppearanceRowInjected } from './AppearanceRow.tsx'
 export type { FontSizeRowComponentProps, FontSizeRowInjected } from './FontSizeRow.tsx'
 export type { AppearanceRowState, FontSizeRowState } from './settings-store.ts'
 export type { ThemeKey } from './locales.ts'
-export type { ThemePreference, ThemeSettings } from '../theme-settings.ts'
+export type { ColorScheme, ThemePalette, ThemePreference, ThemeSettings } from '../theme-settings.ts'
+export { THEME_PALETTES } from '../theme-settings.ts'
 
 /** Namespace owning this feature's settings-row copy. */
 export const SETTINGS_NS = 'settings.theme'
@@ -83,6 +85,18 @@ export interface ThemeSnapshot {
   /** Conversation content font size in px (integer within FONT_SIZE_MIN..FONT_SIZE_MAX). */
   fontSize: number
   /**
+   * The persisted color palette. The presenter publishes it as
+   * `body[data-ds-palette]`, which `styles/palettes.css` reads to rebind the
+   * alias layer under any registered theme or override layer.
+   */
+  palette: ThemePalette
+  /**
+   * The color scheme the palette fixes, or `null` when the palette follows
+   * the preference. A fixed scheme overrides the preference and any
+   * registered theme's own scheme in `active`.
+   */
+  paletteScheme: ColorScheme | null
+  /**
    * The resolved active theme (`system` resolved via prefers-color-scheme)
    * with override layers folded into its tokens (seq order, later layers win
    * per-token; each value picked for the active color scheme).
@@ -114,8 +128,9 @@ declare module '@deepseek-ai/cordis' {
   }
   interface Events {
     /**
-     * Theme state changed (preference switched, registry updated, or the OS
-     * color scheme changed while the preference is `system`).
+     * Theme state changed (preference, palette, or font size switched,
+     * registry updated, or the OS color scheme changed while the preference is
+     * `system`).
      * @param snapshot - Current immutable theme snapshot.
      * @mode emit
      */
@@ -162,6 +177,7 @@ export class ThemeRuntime {
   private themes: ThemeDefinition[] = [...BUILTIN_THEMES]
   private preference: ThemePreference
   private fontSize: number = bootstrapFontSize()
+  private palette: ThemePalette = bootstrapPalette()
   private revision = 0
   private snapshot: ThemeSnapshot
   private readonly media: MediaQueryList | undefined
@@ -255,13 +271,28 @@ export class ThemeRuntime {
     this.publish()
   }
 
+  /**
+   * Switch the color palette — the only palette write entry. Accepted values
+   * are written through the settings scope and emit `theme/change`.
+   * @param id - a built-in palette id; unknown ids throw.
+   */
+  setPalette(id: ThemePalette): void {
+    if (!isThemePalette(id)) throw new Error(`palette "${String(id)}" is not a built-in palette`)
+    if (this.palette === id) return
+    this.palette = id
+    void this.host.set(PALETTE_FIELD, id)
+    this.publish()
+  }
+
   /** Adopt the scope's accepted durable preference without writing it back. */
   private adopt(): void {
     const section = this.host.getSnapshot().value
     if (section === undefined) return
-    if (this.preference === section.preference && this.fontSize === section.fontSize) return
+    if (this.preference === section.preference && this.fontSize === section.fontSize
+      && this.palette === section.palette) return
     this.preference = section.preference
     this.fontSize = section.fontSize
+    this.palette = section.palette
     this.publish()
   }
 
@@ -318,17 +349,25 @@ export class ThemeRuntime {
   }
 
   private buildSnapshot(): ThemeSnapshot {
+    const fixedScheme = paletteScheme(this.palette)
     const resolvedId = this.preference === 'system'
-      ? (this.media?.matches === true ? 'dark' : 'light')
+      ? (fixedScheme ?? (this.media?.matches === true ? 'dark' : 'light'))
       : this.preference
     // Both built-ins always exist; a registered preference id resolves or has
     // been reset by its disposer, so the lookup cannot miss.
-    const active = this.themes.find(t => t.id === resolvedId)
+    const resolved = this.themes.find(t => t.id === resolvedId)
     /* v8 ignore next 2 -- needs a registry without light/dark, which register()/dispose() cannot produce */
-    if (active === undefined) throw new Error(`theme registry lost "${resolvedId}"`)
+    if (resolved === undefined) throw new Error(`theme registry lost "${resolvedId}"`)
+    // A fixed palette's scheme wins over the chosen theme's own scheme, so the
+    // palette sheet always finds the primitives it defines.
+    const active = fixedScheme === null || resolved.colorScheme === fixedScheme
+      ? resolved
+      : Object.freeze({ ...resolved, colorScheme: fixedScheme })
     return Object.freeze({
       preference: this.preference,
       fontSize: this.fontSize,
+      palette: this.palette,
+      paletteScheme: fixedScheme,
       active: this.composeActive(active),
       themes: Object.freeze([...this.themes]),
       revision: this.revision,
@@ -377,6 +416,19 @@ function bootstrapFontSize(): number {
 }
 
 /**
+ * Read the palette the Host boot script wrote on `body` before any plugin ran,
+ * so the initial snapshot matches first paint and the presenter does not flash
+ * the schema default while the settings read is in flight. Non-browser runs
+ * and mounts without the boot script fall back to the schema default.
+ */
+function bootstrapPalette(): ThemePalette {
+  /* v8 ignore next -- needs a documentless run (node e2e booting the client tree), not constructible under jsdom */
+  if (typeof document === 'undefined') return DEFAULT_PALETTE
+  const raw = document.body.dataset.dsPalette
+  return isThemePalette(raw) ? raw : DEFAULT_PALETTE
+}
+
+/**
  * Runtime shape check for one override layer (model-authored callers pass
  * untyped JS through the dynamic-package façade, so the static type cannot
  * enforce the pair shape there). Returns a defensive per-token copy so later
@@ -422,8 +474,8 @@ export const inject = ['slots', 'locale', 'remote', 'configForms']
 
 /**
  * Client plugin body: provide the theme service and register the
- * feature-owned Appearance preference row into the General section's item
- * slot (a feature owns its settings surface).
+ * feature-owned Appearance preference and palette row into the General
+ * section's item slot (a feature owns its settings surface).
  * @param ctx - client cordis context.
  */
 export function apply(ctx: ClientContext): void {
@@ -439,7 +491,7 @@ export function apply(ctx: ClientContext): void {
   const fontSizeStore = createFontSizeRowStore()
   let fontSizeBound: BoundActions<typeof fontSizeStore> | undefined
   const sync = (snapshot: ThemeSnapshot): void => {
-    bound?.sync(snapshot.preference, snapshot.revision)
+    bound?.sync(snapshot.preference, snapshot.palette, snapshot.revision)
     fontSizeBound?.sync(snapshot.fontSize, snapshot.revision)
   }
   ctx.on('theme/change', sync)
@@ -450,6 +502,7 @@ export function apply(ctx: ClientContext): void {
     sync(theme.getTheme())
     return {
       setTheme: (id) => { theme.setTheme(id) },
+      setPalette: (id) => { theme.setPalette(id) },
     }
   }
   ctx.slots.inject('settings.general.item', () => ctx.slots.register({

@@ -1,4 +1,6 @@
-.trigger { width: 28px; padding: 0; flex: none; }
+/* Idle microphone: a Send-sized circle on the fixed success-green pair, so it reads the same under every palette. */
+.trigger { width: 34px; height: 34px; padding: 0; flex: none; border-radius: 50%; corner-shape: round; background: var(--dsw-alias-button-success-fill); color: var(--dsw-alias-button-success-label); transition: background-color 100ms ease; }
+.trigger:hover:not(:disabled) { background: var(--dsw-alias-button-success-hover); }
 .triggerAnchor { display: inline-flex; flex: none; }
 .captureRow { display: flex; align-items: center; gap: 12px; width: 100%; min-width: 0; min-height: 34px; }
 .roundButton { width: 32px; height: 32px; padding: 0; border-radius: 50%; corner-shape: round; flex: none; background: var(--dsw-specific-selector); }

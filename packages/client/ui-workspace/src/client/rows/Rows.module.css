@@ -16,8 +16,10 @@
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
+/* The open session takes the sidebar's active fill, one step above the hover
+   wash, so it stays distinguishable from the row under the pointer. */
 .sessionRow.selected {
-  background: var(--dsw-alias-interactive-bg-hover);
+  background: var(--dsw-specific-sidebar-nav-item-active);
 }
 
 .searchResultRow {

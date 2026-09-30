@@ -15,6 +15,31 @@
   - button "浅色"
   - button "深色"
   - button "跟随系统" [pressed]
+  - text: 配色 标有浅色或深色的配色使用自身的底色，其余配色跟随上方的外观设置
+  - group "配色":
+    - button "中性"
+    - button "暖色"
+    - button "海洋"
+    - button "石墨"
+    - button "森林"
+    - button "紫罗兰"
+    - button "纸张"
+    - button "经典" [pressed]
+    - button "午夜 深色"
+    - button "磷光 深色"
+    - button "极地 深色"
+    - button "薄暮 深色"
+    - button "酒红 深色"
+    - button "余烬 深色"
+    - button "暮光 深色"
+    - button "OLED 纯黑 深色"
+    - button "沙丘 浅色"
+    - button "薄雾 浅色"
+    - button "玫瑰 浅色"
+    - button "丁香 浅色"
+    - button "薄荷 浅色"
+    - button "晴光 浅色"
+    - button "风暴 浅色"
   - text: 字号大小 仅影响会话内容的字号 14
   - button "增大字号"
   - button "减小字号"

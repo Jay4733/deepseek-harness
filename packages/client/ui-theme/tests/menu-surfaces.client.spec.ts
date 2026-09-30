@@ -104,9 +104,12 @@ describe('shared menu material', () => {
   })
 
   it('keeps menu fill and blur tokens owned by the theme on every platform', () => {
+    // The base palette and the color palettes that rebind it are both theme sheets.
+    const THEME_MATERIAL_SHEETS = ['/ui-theme/src/styles/design-platform.css', '/ui-theme/src/styles/palettes.css']
     const failures = packageStylesheets().flatMap(file => parseRules(readFileSync(file, 'utf8'))
       .flatMap(rule => rule.declarations.filter(([name]) =>
-        (['--dsw-specific-menu', '--dsw-menu-surface-fill'].includes(name) && !file.endsWith('/ui-theme/src/styles/design-platform.css'))
+        (['--dsw-specific-menu', '--dsw-menu-surface-fill'].includes(name)
+          && !THEME_MATERIAL_SHEETS.some(sheet => file.endsWith(sheet)))
         || (name === '--dsw-menu-backdrop-filter' && !file.endsWith('/ui-theme/src/styles/gradient-shadow-text.css'))))
       .map(([name]) => `${file}: ${name}`))
     expect(failures).toEqual([])

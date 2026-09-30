@@ -467,8 +467,8 @@ export const EVENT_API: readonly EventApiEntry[] = [
     name: 'theme/change',
     mode: 'emit',
     signature: '\'theme/change\'(snapshot: ThemeSnapshot): void',
-    summary: 'Theme state changed (preference switched, registry updated, or the OS color scheme changed while the preference is `system`).',
-    description: 'Theme state changed (preference switched, registry updated, or the OS color scheme changed while the preference is `system`).',
+    summary: 'Theme state changed (preference, palette, or font size switched, registry updated, or the OS color scheme changed while the preference is `system`).',
+    description: 'Theme state changed (preference, palette, or font size switched, registry updated, or the OS color scheme changed while the preference is `system`).',
     parameters: [{ name: 'snapshot', description: 'Current immutable theme snapshot.' }],
   },
 ]
@@ -522,6 +522,10 @@ export const TYPE_API: readonly TypeApiEntry[] = [
   {
     name: 'ClientRemote',
     declaration: 'export interface ClientRemote extends TypertClientRemote {\n    $stream<Item>(options: RemoteStreamOptions<Item>): RemoteStream<Item>;\n    readonly $host: RemoteHostFacts;\n}',
+  },
+  {
+    name: 'ColorScheme',
+    declaration: 'export type ColorScheme = \'light\' | \'dark\';',
   },
   {
     name: 'CommonKeyOf',
@@ -1004,12 +1008,16 @@ export const TYPE_API: readonly TypeApiEntry[] = [
     declaration: 'export interface ThemeDefinition {\n    id: string;\n    colorScheme: \'light\' | \'dark\';\n    tokens: ThemeTokens;\n}',
   },
   {
+    name: 'ThemePalette',
+    declaration: 'export type ThemePalette = typeof THEME_PALETTES[number];',
+  },
+  {
     name: 'ThemePreference',
     declaration: 'export type ThemePreference = typeof THEME_PREFERENCES[number];',
   },
   {
     name: 'ThemeSnapshot',
-    declaration: 'export interface ThemeSnapshot {\n    preference: ThemePreference;\n    fontSize: number;\n    active: ThemeDefinition;\n    themes: readonly ThemeDefinition[];\n    revision: number;\n}',
+    declaration: 'export interface ThemeSnapshot {\n    preference: ThemePreference;\n    fontSize: number;\n    palette: ThemePalette;\n    paletteScheme: ColorScheme | null;\n    active: ThemeDefinition;\n    themes: readonly ThemeDefinition[];\n    revision: number;\n}',
   },
   {
     name: 'ThemeTokenModes',

@@ -1,0 +1,717 @@
+/* Color palettes (Settings > Appearance). The presenter writes the selected
+ * palette id to body[data-ds-palette]; `classic` matches no rule here and
+ * keeps design-platform.css unchanged. Every other palette declares the same
+ * primitive set for each color scheme, and the shared derivation blocks below
+ * rebind the alias layer from those primitives, so one palette cannot drift
+ * from another's role mapping.
+ *
+ * Primitives (all opaque CSS colors):
+ *   --dsp-bg            document ground
+ *   --dsp-sidebar       sidebar column
+ *   --dsp-surface       composer, cards, first raised layer
+ *   --dsp-raised        user bubble, selector fills, second layer
+ *   --dsp-high          hover-solid fills, third layer
+ *   --dsp-code          code block ground
+ *   --dsp-ink           primary text
+ *   --dsp-ink-2         secondary text
+ *   --dsp-ink-3         tertiary text
+ *   --dsp-ink-4         captions and placeholders
+ *   --dsp-accent        accent fill (send, primary buttons)
+ *   --dsp-accent-strong accent fill hover
+ *   --dsp-accent-ink    accent as text or ring on the ground (links, focus)
+ *   --dsp-on-accent     glyphs and labels drawn on an accent fill
+ *
+ * Adaptive palettes declare both schemes; their light selectors carry
+ * `:not([data-ds-dark-theme])` so a later palette rule never outranks the dark
+ * base palette by source order. Fixed palettes declare the one scheme the
+ * theme service forces for them, under an unconditional selector. The bg,
+ * surface, ink, and accent primitives mirror PALETTES in theme-settings.ts,
+ * which the Appearance row previews and the Host bootstrap paints before these
+ * sheets load. */
+
+/* ---------- Neutral (default): cool greys and DeepSeek blue ---------- */
+body[data-ds-palette='neutral']:not([data-ds-dark-theme]) {
+  --dsp-bg: #fcfcfd;
+  --dsp-sidebar: #f5f6f8;
+  --dsp-surface: #fff;
+  --dsp-raised: #f2f3f5;
+  --dsp-high: #e8eaee;
+  --dsp-code: #f7f8fa;
+  --dsp-ink: #0d0e12;
+  --dsp-ink-2: #4b4f58;
+  --dsp-ink-3: #636874;
+  --dsp-ink-4: #9ca0a8;
+  --dsp-accent: #4562f5;
+  --dsp-accent-strong: #3450e0;
+  --dsp-accent-ink: #3450e0;
+  --dsp-on-accent: #fff;
+}
+
+body[data-ds-palette='neutral'][data-ds-dark-theme] {
+  --dsp-bg: #131416;
+  --dsp-sidebar: #0e0f11;
+  --dsp-surface: #1b1c1f;
+  --dsp-raised: #232428;
+  --dsp-high: #2d2f34;
+  --dsp-code: #17181b;
+  --dsp-ink: #ececf1;
+  --dsp-ink-2: #a8abb4;
+  --dsp-ink-3: #8a8e98;
+  --dsp-ink-4: #6c7079;
+  --dsp-accent: #4865fb;
+  --dsp-accent-strong: #3d5af1;
+  --dsp-accent-ink: #8fa3ff;
+  --dsp-on-accent: #fff;
+}
+
+/* ---------- Warm: charcoal and amber orange ---------- */
+body[data-ds-palette='warm']:not([data-ds-dark-theme]) {
+  --dsp-bg: #fbf8f4;
+  --dsp-sidebar: #f3ede5;
+  --dsp-surface: #fff;
+  --dsp-raised: #f5efe8;
+  --dsp-high: #ebe3d9;
+  --dsp-code: #f8f3ed;
+  --dsp-ink: #221b16;
+  --dsp-ink-2: #5c5047;
+  --dsp-ink-3: #74685d;
+  --dsp-ink-4: #a39789;
+  --dsp-accent: #bd5720;
+  --dsp-accent-strong: #a64a19;
+  --dsp-accent-ink: #a64a19;
+  --dsp-on-accent: #fff;
+}
+
+body[data-ds-palette='warm'][data-ds-dark-theme] {
+  --dsp-bg: #15120f;
+  --dsp-sidebar: #1a1613;
+  --dsp-surface: #211c18;
+  --dsp-raised: #2a2420;
+  --dsp-high: #352d27;
+  --dsp-code: #1c1814;
+  --dsp-ink: #f2ebe3;
+  --dsp-ink-2: #b3a697;
+  --dsp-ink-3: #8f8377;
+  --dsp-ink-4: #7e7266;
+  --dsp-accent: #e27b41;
+  --dsp-accent-strong: #ee8c54;
+  --dsp-accent-ink: #f0a070;
+  --dsp-on-accent: #1a0f08;
+}
+
+/* ---------- Ocean: deep navy and periwinkle ---------- */
+body[data-ds-palette='ocean']:not([data-ds-dark-theme]) {
+  --dsp-bg: #f7f8fd;
+  --dsp-sidebar: #eef1fa;
+  --dsp-surface: #fff;
+  --dsp-raised: #f0f3fb;
+  --dsp-high: #e3e8f6;
+  --dsp-code: #f4f6fc;
+  --dsp-ink: #141a2e;
+  --dsp-ink-2: #4b5470;
+  --dsp-ink-3: #626b87;
+  --dsp-ink-4: #959db7;
+  --dsp-accent: #3e5bd8;
+  --dsp-accent-strong: #3149b8;
+  --dsp-accent-ink: #3149b8;
+  --dsp-on-accent: #fff;
+}
+
+body[data-ds-palette='ocean'][data-ds-dark-theme] {
+  --dsp-bg: #0e1220;
+  --dsp-sidebar: #121728;
+  --dsp-surface: #181e33;
+  --dsp-raised: #1f263f;
+  --dsp-high: #29314d;
+  --dsp-code: #121729;
+  --dsp-ink: #e6eaf7;
+  --dsp-ink-2: #a6afcb;
+  --dsp-ink-3: #838ead;
+  --dsp-ink-4: #6f7896;
+  --dsp-accent: #6b86f8;
+  --dsp-accent-strong: #8199fa;
+  --dsp-accent-ink: #9db0ff;
+  --dsp-on-accent: #0a0f24;
+}
+
+/* ---------- Graphite: neutral greys and silver ---------- */
+body[data-ds-palette='graphite']:not([data-ds-dark-theme]) {
+  --dsp-bg: #fafafa;
+  --dsp-sidebar: #f1f1f2;
+  --dsp-surface: #fff;
+  --dsp-raised: #f3f3f4;
+  --dsp-high: #e7e7e9;
+  --dsp-code: #f6f6f7;
+  --dsp-ink: #18181b;
+  --dsp-ink-2: #52525b;
+  --dsp-ink-3: #6b6b74;
+  --dsp-ink-4: #a1a1aa;
+  --dsp-accent: #27272a;
+  --dsp-accent-strong: #3f3f46;
+  --dsp-accent-ink: #3f3f46;
+  --dsp-on-accent: #fff;
+}
+
+body[data-ds-palette='graphite'][data-ds-dark-theme] {
+  --dsp-bg: #141416;
+  --dsp-sidebar: #19191b;
+  --dsp-surface: #1f1f22;
+  --dsp-raised: #27272b;
+  --dsp-high: #323236;
+  --dsp-code: #19191c;
+  --dsp-ink: #ededf0;
+  --dsp-ink-2: #b2b2b9;
+  --dsp-ink-3: #8c8c95;
+  --dsp-ink-4: #77777f;
+  --dsp-accent: #d4d4d8;
+  --dsp-accent-strong: #ededf0;
+  --dsp-accent-ink: #e4e4e7;
+  --dsp-on-accent: #111113;
+}
+
+/* ---------- Forest: pine and mint ---------- */
+body[data-ds-palette='forest']:not([data-ds-dark-theme]) {
+  --dsp-bg: #f6faf7;
+  --dsp-sidebar: #ecf3ee;
+  --dsp-surface: #fff;
+  --dsp-raised: #eef5f0;
+  --dsp-high: #e0ece4;
+  --dsp-code: #f2f7f3;
+  --dsp-ink: #13201a;
+  --dsp-ink-2: #475a4f;
+  --dsp-ink-3: #5e7165;
+  --dsp-ink-4: #96a69c;
+  --dsp-accent: #237a4d;
+  --dsp-accent-strong: #1c653f;
+  --dsp-accent-ink: #1c653f;
+  --dsp-on-accent: #fff;
+}
+
+body[data-ds-palette='forest'][data-ds-dark-theme] {
+  --dsp-bg: #0e1511;
+  --dsp-sidebar: #121b16;
+  --dsp-surface: #17221c;
+  --dsp-raised: #1e2b24;
+  --dsp-high: #28372f;
+  --dsp-code: #121a15;
+  --dsp-ink: #e5f0e9;
+  --dsp-ink-2: #a5bbad;
+  --dsp-ink-3: #82988a;
+  --dsp-ink-4: #6d8275;
+  --dsp-accent: #5fbf8a;
+  --dsp-accent-strong: #74cc9b;
+  --dsp-accent-ink: #86d6a8;
+  --dsp-on-accent: #07170e;
+}
+
+/* ---------- Violet: plum and lavender ---------- */
+body[data-ds-palette='violet']:not([data-ds-dark-theme]) {
+  --dsp-bg: #faf8fe;
+  --dsp-sidebar: #f1edfb;
+  --dsp-surface: #fff;
+  --dsp-raised: #f3effc;
+  --dsp-high: #e7e0f8;
+  --dsp-code: #f6f3fd;
+  --dsp-ink: #1c1530;
+  --dsp-ink-2: #544a6e;
+  --dsp-ink-3: #6c6286;
+  --dsp-ink-4: #a39abb;
+  --dsp-accent: #6d4ed6;
+  --dsp-accent-strong: #5a3dbd;
+  --dsp-accent-ink: #5a3dbd;
+  --dsp-on-accent: #fff;
+}
+
+body[data-ds-palette='violet'][data-ds-dark-theme] {
+  --dsp-bg: #140f1e;
+  --dsp-sidebar: #191324;
+  --dsp-surface: #1f182d;
+  --dsp-raised: #271f38;
+  --dsp-high: #322845;
+  --dsp-code: #181224;
+  --dsp-ink: #eee8fa;
+  --dsp-ink-2: #b7abd0;
+  --dsp-ink-3: #9185ab;
+  --dsp-ink-4: #7b7095;
+  --dsp-accent: #a78bfa;
+  --dsp-accent-strong: #b9a2fb;
+  --dsp-accent-ink: #c6b4ff;
+  --dsp-on-accent: #160c2e;
+}
+
+/* ---------- Paper: parchment and clay ---------- */
+body[data-ds-palette='paper']:not([data-ds-dark-theme]) {
+  --dsp-bg: #f5f1ea;
+  --dsp-sidebar: #ece6db;
+  --dsp-surface: #fbf9f5;
+  --dsp-raised: #efe9df;
+  --dsp-high: #e4dccf;
+  --dsp-code: #f0ebe2;
+  --dsp-ink: #2b2520;
+  --dsp-ink-2: #574e45;
+  --dsp-ink-3: #6d645a;
+  --dsp-ink-4: #a2988c;
+  --dsp-accent: #b45a3b;
+  --dsp-accent-strong: #9e4c30;
+  --dsp-accent-ink: #9e4c30;
+  --dsp-on-accent: #fff;
+}
+
+body[data-ds-palette='paper'][data-ds-dark-theme] {
+  --dsp-bg: #1b1815;
+  --dsp-sidebar: #201c18;
+  --dsp-surface: #26211d;
+  --dsp-raised: #2e2823;
+  --dsp-high: #39322b;
+  --dsp-code: #211d19;
+  --dsp-ink: #efe8dc;
+  --dsp-ink-2: #bcb1a2;
+  --dsp-ink-3: #968b7c;
+  --dsp-ink-4: #827868;
+  --dsp-accent: #d97757;
+  --dsp-accent-strong: #e48a6c;
+  --dsp-accent-ink: #eb9c80;
+  --dsp-on-accent: #1c0e08;
+}
+
+/* ---------- Midnight: deep navy and cornflower (fixed dark) ---------- */
+body[data-ds-palette='midnight'] {
+  --dsp-bg: #0c1528;
+  --dsp-sidebar: #09101f;
+  --dsp-surface: #111c31;
+  --dsp-raised: #19263f;
+  --dsp-high: #29364e;
+  --dsp-code: #0b1223;
+  --dsp-ink: #e3e9f8;
+  --dsp-ink-2: #a2a9ba;
+  --dsp-ink-3: #828a9a;
+  --dsp-ink-4: #626a7b;
+  --dsp-accent: #5b9bff;
+  --dsp-accent-strong: #6fa7ff;
+  --dsp-accent-ink: #84b4ff;
+  --dsp-on-accent: #050912;
+}
+
+/* ---------- Phosphor: terminal black and signal green (fixed dark) ---------- */
+body[data-ds-palette='phosphor'] {
+  --dsp-bg: #0b120d;
+  --dsp-sidebar: #090e0a;
+  --dsp-surface: #0f1812;
+  --dsp-raised: #16211a;
+  --dsp-high: #253129;
+  --dsp-code: #0a100b;
+  --dsp-ink: #cfe8d2;
+  --dsp-ink-2: #94a897;
+  --dsp-ink-3: #778879;
+  --dsp-ink-4: #59685c;
+  --dsp-accent: #2ecc71;
+  --dsp-accent-strong: #47d282;
+  --dsp-accent-ink: #62d994;
+  --dsp-on-accent: #050806;
+}
+
+/* ---------- Arctic: slate and glacier blue (fixed dark) ---------- */
+body[data-ds-palette='arctic'] {
+  --dsp-bg: #252c38;
+  --dsp-sidebar: #1d222c;
+  --dsp-surface: #2d3543;
+  --dsp-raised: #3a4353;
+  --dsp-high: #485160;
+  --dsp-code: #212731;
+  --dsp-ink: #fbfcfc;
+  --dsp-ink-2: #bbbec1;
+  --dsp-ink-3: #9da0a6;
+  --dsp-ink-4: #7b7f86;
+  --dsp-accent: #8ec3d1;
+  --dsp-accent-strong: #9ccad7;
+  --dsp-accent-ink: #aad2dc;
+  --dsp-on-accent: #111419;
+}
+
+/* ---------- Dusk: indigo night and lavender (fixed dark) ---------- */
+body[data-ds-palette='dusk'] {
+  --dsp-bg: #1a1528;
+  --dsp-sidebar: #14101f;
+  --dsp-surface: #201b32;
+  --dsp-raised: #2a2441;
+  --dsp-high: #3a3450;
+  --dsp-code: #171223;
+  --dsp-ink: #ece7f8;
+  --dsp-ink-2: #ada8ba;
+  --dsp-ink-3: #8e889a;
+  --dsp-ink-4: #6e697b;
+  --dsp-accent: #b38cff;
+  --dsp-accent-strong: #bc9aff;
+  --dsp-accent-ink: #c6a9ff;
+  --dsp-on-accent: #0c0912;
+}
+
+/* ---------- Wine: oxblood and rose (fixed dark) ---------- */
+body[data-ds-palette='wine'] {
+  --dsp-bg: #1e1114;
+  --dsp-sidebar: #170d10;
+  --dsp-surface: #251519;
+  --dsp-raised: #2f1b21;
+  --dsp-high: #3e2b31;
+  --dsp-code: #1a0f12;
+  --dsp-ink: #efe0e4;
+  --dsp-ink-2: #b0a2a6;
+  --dsp-ink-3: #918386;
+  --dsp-ink-4: #726467;
+  --dsp-accent: #d44b69;
+  --dsp-accent-strong: #d9617b;
+  --dsp-accent-ink: #df788e;
+  --dsp-on-accent: #0d0809;
+}
+
+/* ---------- Ember: charcoal and flame orange (fixed dark) ---------- */
+body[data-ds-palette='ember'] {
+  --dsp-bg: #201512;
+  --dsp-sidebar: #19100e;
+  --dsp-surface: #261b17;
+  --dsp-raised: #2f231e;
+  --dsp-high: #3f332e;
+  --dsp-code: #1c1210;
+  --dsp-ink: #f3ebe2;
+  --dsp-ink-2: #b4aba4;
+  --dsp-ink-3: #948b84;
+  --dsp-ink-4: #746b65;
+  --dsp-accent: #ff8a4c;
+  --dsp-accent-strong: #ff9861;
+  --dsp-accent-ink: #ffa779;
+  --dsp-on-accent: #0e0908;
+}
+
+/* ---------- Twilight: deep teal and sea green (fixed dark) ---------- */
+body[data-ds-palette='twilight'] {
+  --dsp-bg: #032a3a;
+  --dsp-sidebar: #02212d;
+  --dsp-surface: #063142;
+  --dsp-raised: #0b3b4d;
+  --dsp-high: #1d4958;
+  --dsp-code: #032533;
+  --dsp-ink: #f5f0e3;
+  --dsp-ink-2: #acb5b0;
+  --dsp-ink-3: #8c9b9a;
+  --dsp-ink-4: #64797e;
+  --dsp-accent: #2aa198;
+  --dsp-accent-strong: #44aca4;
+  --dsp-accent-ink: #5fb8b2;
+  --dsp-on-accent: #01131a;
+}
+
+/* ---------- OLED Black: true black and white (fixed dark) ---------- */
+body[data-ds-palette='oled'] {
+  --dsp-bg: #000000;
+  --dsp-sidebar: #000000;
+  --dsp-surface: #080808;
+  --dsp-raised: #141414;
+  --dsp-high: #262626;
+  --dsp-code: #0a0a0a;
+  --dsp-ink: #f2f2f2;
+  --dsp-ink-2: #a9a9a9;
+  --dsp-ink-3: #858585;
+  --dsp-ink-4: #616161;
+  --dsp-accent: #ffffff;
+  --dsp-accent-strong: #e6e6e6;
+  --dsp-accent-ink: #ffffff;
+  --dsp-on-accent: #000000;
+}
+
+/* ---------- Sand: dune beige and teal (fixed light) ---------- */
+body[data-ds-palette='sand'] {
+  --dsp-bg: #f3efe4;
+  --dsp-sidebar: #efeadc;
+  --dsp-surface: #fbf9f6;
+  --dsp-raised: #ece5d6;
+  --dsp-high: #e0dacc;
+  --dsp-code: #f1ecdf;
+  --dsp-ink: #202b2b;
+  --dsp-ink-2: #4d5553;
+  --dsp-ink-3: #616763;
+  --dsp-ink-4: #92958f;
+  --dsp-accent: #1f7a6d;
+  --dsp-accent-strong: #1b695e;
+  --dsp-accent-ink: #1b695e;
+  --dsp-on-accent: #ffffff;
+}
+
+/* ---------- Mist: pale sky and cobalt (fixed light) ---------- */
+body[data-ds-palette='mist'] {
+  --dsp-bg: #f0f4fa;
+  --dsp-sidebar: #e9eff8;
+  --dsp-surface: #fafbfd;
+  --dsp-raised: #e4ebf6;
+  --dsp-high: #d8dfea;
+  --dsp-code: #ecf1f9;
+  --dsp-ink: #1c2433;
+  --dsp-ink-2: #505764;
+  --dsp-ink-3: #626a76;
+  --dsp-ink-4: #9197a0;
+  --dsp-accent: #2f6fdb;
+  --dsp-accent-strong: #285fbc;
+  --dsp-accent-ink: #285fbc;
+  --dsp-on-accent: #ffffff;
+}
+
+/* ---------- Rose: blush and raspberry (fixed light) ---------- */
+body[data-ds-palette='rose'] {
+  --dsp-bg: #fdf3f5;
+  --dsp-sidebar: #faebee;
+  --dsp-surface: #fefbfc;
+  --dsp-raised: #f8e4e9;
+  --dsp-high: #ecd8dd;
+  --dsp-code: #fbeef1;
+  --dsp-ink: #2e1f27;
+  --dsp-ink-2: #61535a;
+  --dsp-ink-3: #73656c;
+  --dsp-ink-4: #a3969c;
+  --dsp-accent: #c2386a;
+  --dsp-accent-strong: #a7305b;
+  --dsp-accent-ink: #a7305b;
+  --dsp-on-accent: #ffffff;
+}
+
+/* ---------- Lilac: pale lilac and violet (fixed light) ---------- */
+body[data-ds-palette='lilac'] {
+  --dsp-bg: #f3f1fa;
+  --dsp-sidebar: #edeaf8;
+  --dsp-surface: #fbfafd;
+  --dsp-raised: #e8e4f7;
+  --dsp-high: #ddd8ec;
+  --dsp-code: #efecf9;
+  --dsp-ink: #2a2340;
+  --dsp-ink-2: #58526b;
+  --dsp-ink-3: #69647b;
+  --dsp-ink-4: #9995a7;
+  --dsp-accent: #7651c9;
+  --dsp-accent-strong: #6546ad;
+  --dsp-accent-ink: #6546ad;
+  --dsp-on-accent: #ffffff;
+}
+
+/* ---------- Mint: pale mint and green (fixed light) ---------- */
+body[data-ds-palette='mint'] {
+  --dsp-bg: #eff8f3;
+  --dsp-sidebar: #e7f4ed;
+  --dsp-surface: #f9fdfb;
+  --dsp-raised: #e1f1e8;
+  --dsp-high: #d5e5dc;
+  --dsp-code: #eaf6ef;
+  --dsp-ink: #1f2b25;
+  --dsp-ink-2: #4f5b55;
+  --dsp-ink-3: #636d68;
+  --dsp-ink-4: #929c97;
+  --dsp-accent: #1e8255;
+  --dsp-accent-strong: #1a7049;
+  --dsp-accent-ink: #1a7049;
+  --dsp-on-accent: #ffffff;
+}
+
+/* ---------- Sunlit: warm cream and azure (fixed light) ---------- */
+body[data-ds-palette='sunlit'] {
+  --dsp-bg: #fbf5e4;
+  --dsp-sidebar: #f7f0db;
+  --dsp-surface: #fefcf6;
+  --dsp-raised: #f3ebd3;
+  --dsp-high: #e8e0c9;
+  --dsp-code: #f8f2de;
+  --dsp-ink: #2e2e26;
+  --dsp-ink-2: #59584e;
+  --dsp-ink-3: #6d6b60;
+  --dsp-ink-4: #9d998d;
+  --dsp-accent: #2477b6;
+  --dsp-accent-strong: #1f669d;
+  --dsp-accent-ink: #1f669d;
+  --dsp-on-accent: #ffffff;
+}
+
+/* ---------- Storm: cloud grey and steel blue (fixed light) ---------- */
+body[data-ds-palette='storm'] {
+  --dsp-bg: #eef0f3;
+  --dsp-sidebar: #e7eaef;
+  --dsp-surface: #f9fafb;
+  --dsp-raised: #e2e6eb;
+  --dsp-high: #d6dae0;
+  --dsp-code: #eaecf0;
+  --dsp-ink: #20262f;
+  --dsp-ink-2: #4f545c;
+  --dsp-ink-3: #61666d;
+  --dsp-ink-4: #92959c;
+  --dsp-accent: #4a6899;
+  --dsp-accent-strong: #405984;
+  --dsp-accent-ink: #405984;
+  --dsp-on-accent: #ffffff;
+}
+
+/* ---------- Shared derivation: light scheme ---------- */
+body[data-ds-palette]:not([data-ds-palette='classic']):not([data-ds-dark-theme]) {
+  --dsw-alias-bg-base: var(--dsp-bg);
+  --dsw-alias-bg-document-preview: var(--dsp-raised);
+  --dsw-alias-label-document-preview: var(--dsp-ink-2);
+  --dsw-alias-bg-layer-1: var(--dsp-surface);
+  --dsw-alias-bg-layer-2: var(--dsp-surface);
+  --dsw-alias-bg-layer-3: var(--dsp-surface);
+  --dsw-alias-bg-mask-drop: color-mix(in srgb, var(--dsp-surface) 70%, transparent);
+  --dsw-alias-bg-module-platform: var(--dsp-raised);
+  --dsw-alias-bg-multi-select: var(--dsp-raised);
+  --dsw-alias-bg-overlay: color-mix(in srgb, var(--dsp-ink) 10%, var(--dsp-bg));
+  --dsw-alias-bg-skeleton: color-mix(in srgb, var(--dsp-ink) 5%, transparent);
+  --dsw-alias-border-l1: color-mix(in srgb, var(--dsp-ink) 5%, transparent);
+  --dsw-alias-border-l2-darkmode-thin: color-mix(in srgb, var(--dsp-ink) 10%, transparent);
+  --dsw-alias-border-l2: color-mix(in srgb, var(--dsp-ink) 10%, transparent);
+  --dsw-alias-border-l3: color-mix(in srgb, var(--dsp-ink) 13%, transparent);
+  --dsw-alias-border-l4: color-mix(in srgb, var(--dsp-ink) 17%, transparent);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: var(--dsp-accent);
+  --dsw-alias-button-elevated-fill: var(--dsp-surface);
+  --dsw-alias-button-floating-fill: var(--dsp-surface);
+  --dsw-alias-button-floating-hover: var(--dsp-raised);
+  --dsw-alias-button-ghost-active-border: var(--dsp-ink-4);
+  --dsw-alias-button-ghost-active-fill: color-mix(in srgb, var(--dsp-ink) 6%, var(--dsp-bg));
+  --dsw-alias-button-ghost-active-hover: color-mix(in srgb, var(--dsp-ink) 9%, var(--dsp-bg));
+  --dsw-alias-button-info-fill: var(--dsp-accent);
+  --dsw-alias-button-info-hover: var(--dsp-accent-strong);
+  --dsw-alias-button-info-label: var(--dsp-on-accent);
+  --dsw-alias-button-primary-dimmed: color-mix(in srgb, var(--dsp-ink) 6%, var(--dsp-bg));
+  --dsw-alias-button-primary-fill: var(--dsp-accent);
+  --dsw-alias-button-primary-hover: var(--dsp-accent-strong);
+  --dsw-alias-interactive-bg-active: color-mix(in srgb, var(--dsp-ink) 10%, transparent);
+  --dsw-alias-interactive-bg-hover-accent: color-mix(in srgb, var(--dsp-ink) 14%, transparent);
+  --dsw-alias-interactive-bg-hover-solid: color-mix(in srgb, var(--dsp-ink) 5%, var(--dsp-surface));
+  --dsw-alias-interactive-bg-hover: color-mix(in srgb, var(--dsp-ink) 6%, transparent);
+  --dsw-alias-label-caption: var(--dsp-ink-4);
+  --dsw-alias-label-deep-diving: color-mix(in srgb, var(--dsp-accent-ink) 70%, var(--dsp-ink));
+  --dsw-alias-label-dimmed: color-mix(in srgb, var(--dsp-ink) 13%, var(--dsp-bg));
+  --dsw-alias-label-primary-bluish: var(--dsp-ink);
+  --dsw-alias-label-primary-dimmed: color-mix(in srgb, var(--dsp-ink) 90%, var(--dsp-bg));
+  --dsw-alias-label-primary-foreground: var(--dsp-on-accent);
+  --dsw-alias-label-primary-inverted: var(--dsp-surface);
+  --dsw-alias-label-primary: var(--dsp-ink);
+  --dsw-alias-label-secondary: var(--dsp-ink-2);
+  --dsw-alias-label-tertiary: var(--dsp-ink-3);
+  --dsw-alias-menu-icon: color-mix(in srgb, var(--dsp-ink) 82%, var(--dsp-bg));
+  --dsw-alias-link: var(--dsp-accent-ink);
+  --dsw-alias-markdown-citation: color-mix(in srgb, var(--dsp-ink) 7%, var(--dsp-bg));
+  --dsw-alias-markdown-code-block-banner: var(--dsp-code);
+  --dsw-alias-markdown-code-block: var(--dsp-code);
+  --dsw-alias-markdown-code-segment-selected: var(--dsp-surface);
+  --dsw-alias-markdown-code-segment-unselected: color-mix(in srgb, var(--dsp-ink) 5%, var(--dsp-bg));
+  --dsw-alias-markdown-inline-code: color-mix(in srgb, var(--dsp-ink) 5%, var(--dsp-bg));
+  --dsw-alias-markdown-placeholder: var(--dsp-raised);
+  --dsw-alias-markdown-tag: color-mix(in srgb, var(--dsp-ink) 5%, var(--dsp-bg));
+  --dsw-alias-scrollbar-bg-l1: color-mix(in srgb, var(--dsp-ink) 14%, var(--dsp-bg));
+  --dsw-alias-scrollbar-bg-l2: color-mix(in srgb, var(--dsp-ink) 14%, var(--dsp-bg));
+  --dsw-alias-scrollbar-hover-l1: color-mix(in srgb, var(--dsp-ink) 22%, var(--dsp-bg));
+  --dsw-alias-scrollbar-hover-l2: color-mix(in srgb, var(--dsp-ink) 22%, var(--dsp-bg));
+  --dsw-alias-state-business-primary: var(--dsp-accent);
+  --dsw-alias-state-business-tertiary: color-mix(in srgb, var(--dsp-accent) 14%, var(--dsp-surface));
+  --dsw-alias-toast-bg: color-mix(in srgb, var(--dsp-ink) 86%, var(--dsp-bg));
+  --dsw-alias-tooltip-bg: color-mix(in srgb, var(--dsp-ink) 90%, var(--dsp-bg));
+  --dsw-alias-accent-glow: color-mix(in srgb, var(--dsp-accent) 22%, transparent);
+  --dsw-specific-bubble-highlight: color-mix(in srgb, var(--dsp-accent) 22%, var(--dsp-surface));
+  --dsw-specific-bubble: color-mix(in srgb, var(--dsp-accent) 9%, var(--dsp-surface));
+  --dsw-specific-input-major: var(--dsp-surface);
+  --dsw-specific-login-input: var(--dsp-raised);
+  --dsw-menu-surface-fill: color-mix(in srgb, var(--dsp-surface) 62%, transparent);
+  --dsw-specific-menu: var(--dsw-menu-surface-fill);
+  --dsw-specific-selector: var(--dsp-raised);
+  --dsw-specific-sidebar-fill: var(--dsp-sidebar);
+  --dsw-specific-sidebar-nav-item-active-accent: color-mix(in srgb, var(--dsp-accent) 14%, var(--dsp-sidebar));
+  --dsw-specific-sidebar-nav-item-active: color-mix(in srgb, var(--dsp-ink) 8%, var(--dsp-sidebar));
+  --dsw-specific-sidebar-nav-item-hover: color-mix(in srgb, var(--dsp-ink) 4%, var(--dsp-sidebar));
+  --dsw-specific-tip: var(--dsp-raised);
+  --dsw-linear-gradient-think: linear-gradient(180deg, var(--dsp-bg) 20.19%, color-mix(in srgb, var(--dsp-bg) 0%, transparent) 100%);
+  --dsw-linear-think-select: linear-gradient(180deg, var(--dsp-raised) 20.19%, color-mix(in srgb, var(--dsp-raised) 0%, transparent) 100%);
+}
+
+/* ---------- Shared derivation: dark scheme ---------- */
+body[data-ds-palette]:not([data-ds-palette='classic'])[data-ds-dark-theme] {
+  --dsw-alias-bg-base: var(--dsp-bg);
+  --dsw-alias-bg-document-preview: var(--dsp-bg);
+  --dsw-alias-label-document-preview: var(--dsp-ink-2);
+  --dsw-alias-bg-layer-1: var(--dsp-surface);
+  --dsw-alias-bg-layer-2: var(--dsp-raised);
+  --dsw-alias-bg-layer-3: var(--dsp-high);
+  --dsw-alias-bg-mask-drop: color-mix(in srgb, var(--dsp-bg) 70%, transparent);
+  --dsw-alias-bg-module-platform: var(--dsp-high);
+  --dsw-alias-bg-multi-select: var(--dsp-surface);
+  --dsw-alias-bg-overlay: color-mix(in srgb, var(--dsp-ink) 22%, var(--dsp-high));
+  --dsw-alias-bg-skeleton: color-mix(in srgb, var(--dsp-ink) 8%, transparent);
+  --dsw-alias-border-inverted2: color-mix(in srgb, var(--dsp-ink) 8%, transparent);
+  --dsw-alias-border-inverted: color-mix(in srgb, var(--dsp-ink) 6%, transparent);
+  --dsw-alias-border-l1: color-mix(in srgb, var(--dsp-ink) 6%, transparent);
+  --dsw-alias-border-l2-darkmode-thin: color-mix(in srgb, var(--dsp-ink) 6%, transparent);
+  --dsw-alias-border-l2: color-mix(in srgb, var(--dsp-ink) 12%, transparent);
+  --dsw-alias-border-l3: color-mix(in srgb, var(--dsp-ink) 16%, transparent);
+  --dsw-alias-border-l4: color-mix(in srgb, var(--dsp-ink) 20%, transparent);
+  --dsw-alias-brand-primary-new-colorprimary-new-color: var(--dsp-accent);
+  --dsw-alias-button-elevated-fill: color-mix(in srgb, var(--dsp-ink) 8%, var(--dsp-high));
+  --dsw-alias-button-floating-fill: var(--dsp-raised);
+  --dsw-alias-button-floating-hover: var(--dsp-high);
+  --dsw-alias-button-ghost-active-border: var(--dsp-ink-4);
+  --dsw-alias-button-ghost-active-fill: color-mix(in srgb, var(--dsp-ink) 8%, var(--dsp-high));
+  --dsw-alias-button-ghost-active-hover: color-mix(in srgb, var(--dsp-ink) 16%, var(--dsp-high));
+  --dsw-alias-button-info-fill: var(--dsp-accent);
+  --dsw-alias-button-info-hover: var(--dsp-accent-strong);
+  --dsw-alias-button-info-label: var(--dsp-on-accent);
+  --dsw-alias-button-primary-dimmed: color-mix(in srgb, var(--dsp-ink) 8%, var(--dsp-high));
+  --dsw-alias-button-primary-fill: var(--dsp-accent);
+  --dsw-alias-button-primary-hover: var(--dsp-accent-strong);
+  --dsw-alias-interactive-bg-active: color-mix(in srgb, var(--dsp-ink) 14%, transparent);
+  --dsw-alias-interactive-bg-hover-accent: color-mix(in srgb, var(--dsp-ink) 22%, transparent);
+  --dsw-alias-interactive-bg-hover-solid: var(--dsp-high);
+  --dsw-alias-interactive-bg-hover: color-mix(in srgb, var(--dsp-ink) 7%, transparent);
+  --dsw-alias-label-caption: var(--dsp-ink-4);
+  --dsw-alias-label-deep-diving: color-mix(in srgb, var(--dsp-accent-ink) 60%, var(--dsp-ink-2));
+  --dsw-alias-label-dimmed: color-mix(in srgb, var(--dsp-ink) 16%, var(--dsp-high));
+  --dsw-alias-label-primary-bluish: var(--dsp-ink);
+  --dsw-alias-label-primary-dimmed: color-mix(in srgb, var(--dsp-ink) 88%, var(--dsp-bg));
+  --dsw-alias-label-primary-foreground: var(--dsp-on-accent);
+  --dsw-alias-label-primary-inverted: var(--dsp-high);
+  --dsw-alias-label-primary: var(--dsp-ink);
+  --dsw-alias-label-secondary: var(--dsp-ink-2);
+  --dsw-alias-label-tertiary: var(--dsp-ink-3);
+  --dsw-alias-menu-icon: var(--dsw-alias-label-primary-dimmed);
+  --dsw-alias-link: var(--dsp-accent-ink);
+  --dsw-alias-markdown-citation: var(--dsp-high);
+  --dsw-alias-markdown-code-block-banner: var(--dsp-surface);
+  --dsw-alias-markdown-code-block: var(--dsp-code);
+  --dsw-alias-markdown-code-segment-selected: var(--dsp-high);
+  --dsw-alias-markdown-code-segment-unselected: var(--dsp-code);
+  --dsw-alias-markdown-inline-code: var(--dsp-raised);
+  --dsw-alias-markdown-placeholder: var(--dsp-surface);
+  --dsw-alias-markdown-tag: var(--dsp-raised);
+  --dsw-alias-scrollbar-bg-l1: color-mix(in srgb, var(--dsp-ink) 20%, var(--dsp-bg));
+  --dsw-alias-scrollbar-bg-l2: color-mix(in srgb, var(--dsp-ink) 28%, var(--dsp-bg));
+  --dsw-alias-scrollbar-hover-l1: color-mix(in srgb, var(--dsp-ink) 28%, var(--dsp-bg));
+  --dsw-alias-scrollbar-hover-l2: color-mix(in srgb, var(--dsp-ink) 36%, var(--dsp-bg));
+  --dsw-alias-state-business-primary: var(--dsp-accent-ink);
+  --dsw-alias-state-business-tertiary: color-mix(in srgb, var(--dsp-accent) 22%, var(--dsp-bg));
+  --dsw-alias-toast-bg: color-mix(in srgb, var(--dsp-ink) 12%, var(--dsp-high));
+  --dsw-alias-tooltip-bg: color-mix(in srgb, var(--dsp-ink) 12%, var(--dsp-high));
+  --dsw-alias-accent-glow: color-mix(in srgb, var(--dsp-accent) 30%, transparent);
+  --dsw-specific-bubble-highlight: color-mix(in srgb, var(--dsp-accent) 18%, var(--dsp-high));
+  --dsw-specific-bubble: var(--dsp-raised);
+  --dsw-specific-input-major: var(--dsp-surface);
+  --dsw-specific-login-input: var(--dsp-sidebar);
+  --dsw-menu-surface-fill: color-mix(in srgb, var(--dsp-high) 58%, transparent);
+  --dsw-specific-menu: var(--dsw-menu-surface-fill);
+  --dsw-specific-selector: var(--dsp-raised);
+  --dsw-specific-sidebar-fill: var(--dsp-sidebar);
+  --dsw-specific-sidebar-nav-item-active-accent: color-mix(in srgb, var(--dsp-accent) 18%, var(--dsp-sidebar));
+  --dsw-specific-sidebar-nav-item-active: var(--dsp-raised);
+  --dsw-specific-sidebar-nav-item-hover: color-mix(in srgb, var(--dsp-raised) 55%, var(--dsp-sidebar));
+  --dsw-specific-tip: var(--dsp-raised);
+  --dsw-linear-gradient-think: linear-gradient(180deg, var(--dsp-bg) 20.19%, color-mix(in srgb, var(--dsp-bg) 0%, transparent) 100%);
+  --dsw-linear-think-select: linear-gradient(180deg, var(--dsp-surface) 20.19%, color-mix(in srgb, var(--dsp-surface) 0%, transparent) 100%);
+}
+
+/* Overlays without MenuSurface's opaque backing keep a nearly opaque fill on
+ * macOS (design-platform.css states the reason); palettes tint it. */
+html[data-platform='darwin'] body[data-ds-palette]:not([data-ds-palette='classic']):not([data-ds-dark-theme]) {
+  --dsw-specific-menu: color-mix(in srgb, var(--dsp-surface) 94%, transparent);
+}
+
+html[data-platform='darwin'] body[data-ds-palette]:not([data-ds-palette='classic'])[data-ds-dark-theme] {
+  --dsw-specific-menu: color-mix(in srgb, var(--dsp-high) 94%, transparent);
+}

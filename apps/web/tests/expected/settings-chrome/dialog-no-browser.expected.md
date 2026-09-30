@@ -15,6 +15,31 @@
   - button "Light"
   - button "Dark"
   - button "System" [pressed]
+  - text: Color palette Palettes tagged Light or Dark set their own base; the others follow Appearance above.
+  - group "Color palette":
+    - button "Neutral"
+    - button "Warm"
+    - button "Ocean"
+    - button "Graphite"
+    - button "Forest"
+    - button "Violet"
+    - button "Paper"
+    - button "Classic" [pressed]
+    - button "Midnight Dark"
+    - button "Phosphor Dark"
+    - button "Arctic Dark"
+    - button "Dusk Dark"
+    - button "Wine Dark"
+    - button "Ember Dark"
+    - button "Twilight Dark"
+    - button "OLED Black Dark"
+    - button "Sand Light"
+    - button "Mist Light"
+    - button "Rose Light"
+    - button "Lilac Light"
+    - button "Mint Light"
+    - button "Sunlit Light"
+    - button "Storm Light"
   - text: Font size Only affects conversation content 14
   - button "Increase font size"
   - button "Decrease font size"

@@ -3,7 +3,7 @@
 import { runInNewContext } from 'node:vm'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { bootThemeInjections } from '../src/boot-theme.ts'
-import type { ThemePreference } from '../src/theme-settings.ts'
+import type { ThemePalette, ThemePreference } from '../src/theme-settings.ts'
 
 const DARK_ATTRIBUTE = 'data-ds-dark-theme'
 
@@ -11,8 +11,8 @@ function mockSystemDark(matches: boolean): void {
   vi.stubGlobal('matchMedia', vi.fn(() => ({ matches }) as MediaQueryList))
 }
 
-function executeBootstrap(preference?: ThemePreference, fontSize?: number): void {
-  for (const row of bootThemeInjections(preference, fontSize)) {
+function executeBootstrap(preference?: ThemePreference, fontSize?: number, palette?: ThemePalette): void {
+  for (const row of bootThemeInjections(preference, fontSize, palette)) {
     if (row.kind === 'script') runInNewContext(row.text, { document, matchMedia: globalThis.matchMedia })
   }
 }
@@ -22,13 +22,14 @@ afterEach(() => {
   vi.unstubAllGlobals()
   delete document.documentElement.dataset.dsThemeSource
   document.body.removeAttribute(DARK_ATTRIBUTE)
+  delete document.body.dataset.dsPalette
   document.body.style.removeProperty('--dsh-content-font-size')
 })
 
 describe('theme bootstrap row', () => {
   it('colors the body with head CSS before applying body state', () => {
     mockSystemDark(false)
-    const [head, body] = bootThemeInjections('dark')
+    const [head, body] = bootThemeInjections('dark', 14, 'classic')
     expect(head).toMatchObject({ kind: 'style' })
     expect(body).toMatchObject({ kind: 'script', placement: 'body' })
     if (head?.kind !== 'style') throw new Error('theme head bootstrap row is not a style')
@@ -43,7 +44,7 @@ describe('theme bootstrap row', () => {
   it('lets durable light override a dark OS and clears stale dark state', () => {
     document.body.setAttribute(DARK_ATTRIBUTE, '')
     mockSystemDark(true)
-    const [head] = bootThemeInjections('light')
+    const [head] = bootThemeInjections('light', 14, 'classic')
     if (head?.kind !== 'style') throw new Error('theme head bootstrap row is not a style')
     expect(head.text).toBe(':root{color-scheme:light}body{background-color:#fff;--dsh-boot-bg:#fff}')
     executeBootstrap('light')
@@ -61,12 +62,40 @@ describe('theme bootstrap row', () => {
   })
 
   it('uses a media query for the system canvas palette', () => {
-    const [head] = bootThemeInjections('system')
+    const [head] = bootThemeInjections('system', 14, 'classic')
     if (head?.kind !== 'style') throw new Error('theme head bootstrap row is not a style')
     expect(head.text).toBe(
       ':root{color-scheme:light}body{background-color:#fff;--dsh-boot-bg:#fff}'
       + '@media(prefers-color-scheme:dark){:root{color-scheme:dark}body{background-color:#151517;--dsh-boot-bg:#151517}}',
     )
+  })
+
+  it('lets a fixed palette force its scheme over the durable preference', () => {
+    mockSystemDark(false)
+    const [head] = bootThemeInjections('system', 14, 'midnight')
+    if (head?.kind !== 'style') throw new Error('theme head bootstrap row is not a style')
+    expect(head.text).toBe(':root{color-scheme:dark}body{background-color:#0c1528;--dsh-boot-bg:#0c1528}')
+    executeBootstrap('light', 14, 'phosphor')
+    expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(true)
+    expect(document.documentElement.dataset.dsThemeSource).toBe('dark')
+    mockSystemDark(true)
+    executeBootstrap('dark', 14, 'mist')
+    expect(document.body.hasAttribute(DARK_ATTRIBUTE)).toBe(false)
+    expect(document.body.dataset.dsPalette).toBe('mist')
+  })
+
+  it('paints the default Neutral canvas and installs the palette attribute before plugins load', () => {
+    mockSystemDark(true)
+    const [head] = bootThemeInjections()
+    if (head?.kind !== 'style') throw new Error('theme head bootstrap row is not a style')
+    expect(head.text).toBe(
+      ':root{color-scheme:light}body{background-color:#fcfcfd;--dsh-boot-bg:#fcfcfd}'
+      + '@media(prefers-color-scheme:dark){:root{color-scheme:dark}body{background-color:#131416;--dsh-boot-bg:#131416}}',
+    )
+    executeBootstrap()
+    expect(document.body.dataset.dsPalette).toBe('neutral')
+    executeBootstrap('dark', 14, 'ocean')
+    expect(document.body.dataset.dsPalette).toBe('ocean')
   })
 
   it('defaults to system and falls back to light when matchMedia is unavailable', () => {

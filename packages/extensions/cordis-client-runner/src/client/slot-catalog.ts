@@ -704,8 +704,8 @@ export const CLIENT_SLOT_API: readonly ClientSlotEntry[] = [
     key: 'conversation.input.activity',
     kind: 'single',
     scope: 'session',
-    summary: 'Compact action after the model selector; it can expand across the toolbar while retaining the editor and submit action.',
-    doc: 'Compact action after the model selector; it can expand across the toolbar while retaining the editor and submit action.',
+    summary: 'Compact action stacked above the submit action; it can expand across the toolbar while retaining the editor and submit action.',
+    doc: 'Compact action stacked above the submit action; it can expand across the toolbar while retaining the editor and submit action.',
     registerOptions: [],
     ownerProps: [
       '/** A toolbar activity hides ordinary accessory controls while expanded; its occupant must release expansion on unmount. */\nexport interface InputActivityOwnerProps extends InputControlOwnerProps {\n  /** @param active - whether the occupant needs the toolbar width before the submit action. */\n  onActiveChange: (active: boolean) => void\n}',

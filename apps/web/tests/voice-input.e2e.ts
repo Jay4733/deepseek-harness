@@ -130,7 +130,10 @@ it.skipIf(webSnapshotMode() === 'record')('guides voice setup, records from stan
   const micBox = await mic.boundingBox(), modelBox = await page.getByRole('button', { name: /^Select model, current/ }).boundingBox()
   const sendBox = await page.getByRole('button', { name: 'Send message', exact: true }).boundingBox()
   expect(micBox!.x).toBeGreaterThan(modelBox!.x)
-  expect(micBox!.x).toBeLessThan(sendBox!.x)
+  // The idle microphone stacks 8px above Send and shares its column and size.
+  expect(micBox!.x + micBox!.width / 2).toBeCloseTo(sendBox!.x + sendBox!.width / 2, 0)
+  expect(micBox!.width).toBe(sendBox!.width)
+  expect(sendBox!.y - (micBox!.y + micBox!.height)).toBeCloseTo(8, 0)
   await input.fill(prefix)
   await mic.click()
   await page.getByRole('button', { name: 'Stop and transcribe', exact: true }).waitFor()

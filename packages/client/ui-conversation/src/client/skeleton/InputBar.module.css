@@ -76,6 +76,30 @@
   --dsh-scrollbar-thumb-hover: var(--dsw-alias-scrollbar-hover-l2);
 }
 
+/* Accent glow layer: a transparent overlay whose outer blurred shadow in the
+   palette glow token fades in while the draft holds focus. The overlay paints
+   nothing inside the card and never takes the pointer. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 6px 28px -6px var(--dsw-alias-accent-glow);
+  opacity: 0;
+  transition: opacity 160ms var(--ds-ease-in-out);
+  pointer-events: none;
+}
+
+/* A live draft lights the card: the hairline stroke takes the accent and the
+   glow layer shows. */
+.card:focus-within:not(.cardWorkspaceTrigger) {
+  --dsw-elevation-stroke-color: color-mix(in srgb, var(--dsw-alias-state-business-primary) 40%, transparent);
+}
+
+.card:focus-within:not(.cardWorkspaceTrigger)::before {
+  opacity: 1;
+}
+
 /* No-workspace trigger state: an inset 1px dashed outline marks the card as a
    workspace picker rather than a live composer. Keeping the complete stroke
    inside the rounded box prevents clipped corner pixels from reading heavier. */
@@ -299,6 +323,8 @@
      wrapped line; on a single line space-between already pins it right. */
   margin-left: auto;
   gap: 12px;
+  /* Anchors the idle activity control above Send (.activity). */
+  position: relative;
 }
 
 /* Compact spacing preserves room for the fixed-width controls in narrow cards. */
@@ -366,9 +392,9 @@
   cursor: default;
 }
 
-/* Primary send (figma IconButton 34:10465): 34px circle, #3964FE light /
-   #679EFE dark — the info-fill pair (500→400), NOT button-primary (ink);
-   white glyph; empty text = 0.4 opacity. */
+/* Primary send (figma IconButton 34:10465): 34px circle on the info-fill
+   pair (the palette accent), NOT button-primary; the glyph takes the
+   palette's on-accent label; empty text = 0.4 opacity. */
 .primary {
   display: grid;
   place-items: center;
@@ -379,19 +405,22 @@
   border-radius: 999px;
   corner-shape: round;
   background: var(--dsw-alias-button-info-fill);
-  /* Static white, not the foreground token: the arrow stays white on the blue
-     fill in both themes (design 34:10465). */
-  color: #fff;
+  color: var(--dsw-alias-button-info-label);
   cursor: pointer;
-  transition: background-color 100ms ease;
+  transition: background-color 100ms ease, box-shadow 160ms ease;
   /* Opts out of the row's 2px downward shift (.row top pad): the send circle
      keeps its original seat while the smaller chips sit lower. Transform, not
      margin, so flex centering math is untouched. */
   transform: translateY(-2px);
 }
 
+.primary:not(:disabled) {
+  box-shadow: 0 4px 14px -4px var(--dsw-alias-accent-glow);
+}
+
 .primary:hover:not(:disabled) {
   background: var(--dsw-alias-button-info-hover);
+  box-shadow: 0 6px 18px -4px var(--dsw-alias-accent-glow);
 }
 
 .primary:disabled {
@@ -413,6 +442,11 @@
 .standardControls { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .tools[hidden], .standardControls[hidden] { display: none; }
 .trailingActive { flex: 1; margin-left: 0; }
-.activity { display: flex; align-items: center; flex: none; }
+/* The idle activity control stacks 8px above Send in the card's right column
+   and shares Send's 2px lift; the docked 36px draft floor leaves room for a
+   34px control. While it is present the draft scrollport ends before that
+   column. An expanded activity returns to the row (.activityExpanded). */
+.activity { display: flex; align-items: center; flex: none; position: absolute; right: 0; bottom: calc(100% + 8px); transform: translateY(-2px); }
 .activity:empty { display: none; }
+.card:has(.activity:not(:empty)) .scroll { margin-right: 46px; }
 .activityExpanded { flex: 1; min-width: 0; }

@@ -36,6 +36,8 @@ body {
   --dsw-static-green-500: rgb(34, 197, 94);
   --dsw-static-green-500-a08: rgb(34 197 94 / 8%);
   --dsw-static-green-500-a12: rgb(34 197 94 / 12%);
+  --dsw-static-green-600: rgb(30, 158, 84);
+  --dsw-static-green-700: rgb(24, 136, 72);
   --dsw-static-green-900: rgb(35, 60, 44);
   --dsw-static-neutral-00: rgb(255, 255, 255);
   --dsw-static-neutral-1000: rgb(0, 0, 0);
@@ -117,6 +119,8 @@ body[data-ds-dark-theme] {
   --dsw-static-green-500: rgb(34, 197, 94);
   --dsw-static-green-500-a08: rgb(34 197 94 / 8%);
   --dsw-static-green-500-a12: rgb(34 197 94 / 12%);
+  --dsw-static-green-600: rgb(30, 158, 84);
+  --dsw-static-green-700: rgb(24, 136, 72);
   --dsw-static-green-900: rgb(35, 60, 44);
   --dsw-static-neutral-00: rgb(255, 255, 255);
   --dsw-static-neutral-1000: rgb(0, 0, 0);
@@ -164,6 +168,7 @@ body[data-ds-dark-theme] {
 }
 
 body {
+  --dsw-alias-accent-glow: color-mix(in srgb, var(--dsw-static-deepseek-500) 18%, transparent);
   --dsw-alias-bg-base: var(--dsw-static-neutral-bluish-00);
   --dsw-alias-bg-document-preview: var(--dsw-static-neutral-bluish-100);
   --dsw-alias-label-document-preview: var(--dsw-static-neutral-bluish-700);
@@ -199,6 +204,10 @@ body {
   --dsw-alias-button-ghost-active-hover: var(--dsw-static-neutral-bluish-150);
   --dsw-alias-button-info-fill: var(--dsw-static-deepseek-500);
   --dsw-alias-button-info-hover: var(--dsw-static-deepseek-400);
+  --dsw-alias-button-info-label: var(--dsw-static-neutral-00);
+  --dsw-alias-button-success-fill: var(--dsw-static-green-600);
+  --dsw-alias-button-success-hover: var(--dsw-static-green-700);
+  --dsw-alias-button-success-label: var(--dsw-static-neutral-00);
   --dsw-alias-button-primary-dimmed: var(--dsw-static-neutral-bluish-100);
   --dsw-alias-button-primary-fill: var(--dsw-alias-brand-primary);
   --dsw-alias-button-primary-hover: var(--dsw-static-neutral-bluish-750);
@@ -275,6 +284,7 @@ body {
 }
 
 body[data-ds-dark-theme] {
+  --dsw-alias-accent-glow: color-mix(in srgb, var(--dsw-static-deepseek-400) 24%, transparent);
   --dsw-alias-bg-base: var(--dsw-static-neutral-bluish-950);
   --dsw-alias-bg-document-preview: var(--dsw-static-neutral-bluish-950);
   --dsw-alias-label-document-preview: var(--dsw-static-neutral-bluish-300);
@@ -310,6 +320,10 @@ body[data-ds-dark-theme] {
   --dsw-alias-button-ghost-active-hover: var(--dsw-static-neutral-bluish-700);
   --dsw-alias-button-info-fill: var(--dsw-static-deepseek-400);
   --dsw-alias-button-info-hover: var(--dsw-static-deepseek-500);
+  --dsw-alias-button-info-label: var(--dsw-static-neutral-00);
+  --dsw-alias-button-success-fill: var(--dsw-static-green-600);
+  --dsw-alias-button-success-hover: var(--dsw-static-green-700);
+  --dsw-alias-button-success-label: var(--dsw-static-neutral-00);
   --dsw-alias-button-primary-dimmed: var(--dsw-static-neutral-bluish-750);
   --dsw-alias-button-primary-fill: var(--dsw-alias-brand-primary);
   --dsw-alias-button-primary-hover: var(--dsw-static-neutral-bluish-100);

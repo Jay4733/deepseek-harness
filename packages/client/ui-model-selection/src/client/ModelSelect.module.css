@@ -239,48 +239,87 @@
   height: 14px;
 }
 
-/* Two-level root cells use the same compact rhythm as the model rows. */
-.cell {
-  box-sizing: border-box;
+/* Effort section under the model list: a caption and one track of equal
+   segments. The track and raised checked segment repeat the ui-primitives
+   SegmentedControl treatment; these segments are menu radio items, not tabs,
+   so the tablist primitive does not apply. */
+.effort {
+  flex: none;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 6px;
-  width: auto;
-  min-width: 100%;
-  height: 34px;
-  padding: 0 8px;
-  border: none;
-  border-radius: var(--dsw-radius-md);
-  background: transparent;
-  color: var(--dsw-alias-label-primary);
-  font-size: 13px;
-  line-height: 20px;
-  cursor: pointer;
-  text-align: left;
+  margin-top: 4px;
+  padding: 8px 3px 3px;
+  border-top: 0.5px solid var(--dsw-alias-border-l2);
 }
 
-.cell:hover {
+.effortTitle {
+  padding: 0 4px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 11px;
+  line-height: 16px;
+  font-weight: 500;
+}
+
+.segments {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--dsw-radius-md);
   background: var(--dsw-alias-interactive-bg-hover);
 }
 
-.cellLabel {
-  flex: 0 0 auto;
+.segment {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: var(--dsw-radius-sm);
+  outline: none;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  font: inherit;
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 500;
   white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease, color 120ms ease;
 }
 
-.cellValue {
-  flex: 1 1 auto;
+.segment:hover:not(:disabled) {
+  color: var(--dsw-alias-label-primary);
+}
+
+.segment:focus-visible {
+  box-shadow: 0 0 0 2px var(--dsw-focus-ring-color, var(--dsw-alias-state-business-primary));
+}
+
+.segmentChecked {
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  box-shadow: var(--dsw-elevation-soft);
+}
+
+.segment:disabled {
+  cursor: default;
+}
+
+.segmentLabel {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: right;
-  color: var(--dsw-alias-label-tertiary);
 }
 
-.cellChevron {
-  flex: 0 0 auto;
-  width: 12px;
-  height: 12px;
-  color: var(--dsw-alias-menu-icon);
+@media (prefers-reduced-motion: reduce) {
+  .segment {
+    transition: none;
+  }
 }

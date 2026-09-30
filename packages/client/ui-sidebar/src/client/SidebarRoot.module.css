@@ -406,38 +406,25 @@
   padding: 8px 12px;
   margin: 0 2px 12px;
   box-sizing: border-box;
-  border: 0.5px solid var(--dsw-alias-border-l3);
+  border: 0;
   border-radius: var(--dsw-radius-md);
-  background: var(--dsw-alias-button-elevated-fill);
-  color: var(--dsw-alias-label-primary);
+  /* The sidebar's call to action: the palette accent fill with its on-accent
+     label and a soft accent glow, on every platform including macOS
+     vibrancy. */
+  background: var(--dsw-alias-button-info-fill);
+  color: var(--dsw-alias-button-info-label);
+  box-shadow: 0 6px 16px -8px var(--dsw-alias-accent-glow);
   font-size: 14px;
   font-weight: 500;
   line-height: 22px;
   cursor: pointer;
   overflow: hidden;
+  transition: background-color 100ms ease, box-shadow 160ms ease;
 }
 
 .newSession:hover {
-  background: var(--dsw-alias-button-floating-hover);
-}
-
-/* macOS: the themed elevated fill reads as a foreign slab on the vibrancy
-   sidebar; a white wash sits in the glass like native macOS sidebar
-   controls. Dark keeps the same white ink at lower alpha. */
-:global([data-platform='darwin']) .newSession {
-  background: rgb(255 255 255 / 0.55);
-}
-
-:global([data-platform='darwin']) .newSession:hover {
-  background: rgb(255 255 255 / 0.3);
-}
-
-:global([data-platform='darwin']) :global([data-ds-dark-theme]) .newSession {
-  background: rgb(255 255 255 / 0.15);
-}
-
-:global([data-platform='darwin']) :global([data-ds-dark-theme]) .newSession:hover {
-  background: rgb(255 255 255 / 0.2);
+  background: var(--dsw-alias-button-info-hover);
+  box-shadow: 0 8px 20px -8px var(--dsw-alias-accent-glow);
 }
 
 .collapsed .newSession {
@@ -447,8 +434,9 @@
   padding: 0;
   margin: 0 0 12px;
   gap: 0;
-  border-color: transparent;
   background: transparent;
+  box-shadow: none;
+  color: var(--dsw-alias-label-primary);
 }
 
 .collapsed .newSession:hover {

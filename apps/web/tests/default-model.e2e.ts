@@ -106,7 +106,6 @@ describe('web e2e: the composer model switch is the default for later sessions',
     await trigger.waitFor({ timeout: 15_000 })
     expect(await trigger.evaluate(element => getComputedStyle(element).fontWeight)).toBe('400')
     await trigger.click()
-    await page.getByRole('menuitem', { name: /模型/ }).click()
     const entered = Promise.withResolvers<undefined>()
     const release = Promise.withResolvers<undefined>()
     const blocked = scaffold.ctx.hmr.runExclusive(async () => {
@@ -165,7 +164,6 @@ describe('web e2e: the composer model switch is the default for later sessions',
     const aria = await captureStableAria(page, '[data-composer-card]', scaffold.workspaceCwd)
     await compareOrRefreshGolden(fileURLToPath(new URL('./expected/default-model/unselected.expected.md', import.meta.url)), aria, webSnapshotMode())
     await seat.click()
-    await page.getByRole('menuitem', { name: /模型/ }).click()
     await page.getByRole('menuitemradio').first().click()
     await expect.poll(async () => box.isEnabled(), { timeout: 15_000 }).toBe(true)
     expect(tripwire.pageErrors).toEqual([])
