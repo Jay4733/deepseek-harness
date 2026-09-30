@@ -27,6 +27,8 @@ describe('ThemeRuntime', () => {
     const snapshot = theme.getTheme()
     expect(snapshot.preference).toBe('system')
     expect(snapshot.fontSize).toBe(14)
+    expect(snapshot.palette).toBe('neutral')
+    expect(snapshot.paletteScheme).toBeNull()
     // jsdom matchMedia is absent; system resolves to light.
     expect(snapshot.active.id).toBe('light')
     expect(snapshot.active.colorScheme).toBe('light')
@@ -68,8 +70,76 @@ describe('ThemeRuntime', () => {
 
   it('adopts a published Host font size without writing it back', () => {
     const { theme, events, host } = make()
-    host.publish({ status: 'ready', value: { preference: 'system', fontSize: 12 }, revision: 1, writable: true })
+    host.publish({ status: 'ready', value: { preference: 'system', fontSize: 12, palette: 'neutral' }, revision: 1, writable: true })
     expect(theme.getTheme().fontSize).toBe(12)
+    expect(events).toHaveLength(1)
+    expect(host.set).not.toHaveBeenCalled()
+  })
+
+  it('seeds the initial palette from the boot-script body attribute, ignoring junk', () => {
+    document.body.dataset.dsPalette = 'forest'
+    try {
+      expect(make().theme.getTheme().palette).toBe('forest')
+      document.body.dataset.dsPalette = 'neon'
+      expect(make().theme.getTheme().palette).toBe('neutral')
+    } finally {
+      delete document.body.dataset.dsPalette
+    }
+  })
+
+  it('setPalette switches, writes through the scope, and republishes; same value is a no-op', () => {
+    const { theme, events, host } = make()
+    theme.setPalette('violet')
+    expect(theme.getTheme().palette).toBe('violet')
+    expect(host.set).toHaveBeenCalledWith('palette', 'violet')
+    expect(events).toHaveLength(1)
+    // The service never touches presentation state.
+    expect(document.body.hasAttribute('data-ds-palette')).toBe(false)
+    theme.setPalette('violet')
+    expect(events).toHaveLength(1)
+    expect(host.set).toHaveBeenCalledOnce()
+  })
+
+  it('a fixed palette forces its scheme over the preference and restores it when left', () => {
+    const { theme } = make()
+    theme.setTheme('light')
+    theme.setPalette('midnight')
+    expect(theme.getTheme().paletteScheme).toBe('dark')
+    expect(theme.getTheme().active.colorScheme).toBe('dark')
+    expect(theme.getTheme().preference).toBe('light')
+    theme.setPalette('sand')
+    expect(theme.getTheme().active.colorScheme).toBe('light')
+    theme.setTheme('system')
+    expect(theme.getTheme().active.id).toBe('light')
+    theme.setPalette('neutral')
+    expect(theme.getTheme().paletteScheme).toBeNull()
+    // jsdom has no matchMedia, so system resolves to light again.
+    expect(theme.getTheme().active.colorScheme).toBe('light')
+  })
+
+  it('a fixed palette also overrides a registered theme scheme and picks its tokens for the forced scheme', () => {
+    const { theme } = make()
+    theme.register({ id: 'sepia', colorScheme: 'light', tokens: { '--dsw-alias-bg-base': 'red' } })
+    theme.overrideTokens('layer', { '--dsw-alias-link': { light: 'blue', dark: 'cyan' } })
+    theme.setTheme('sepia')
+    theme.setPalette('oled')
+    const { active } = theme.getTheme()
+    expect(active.id).toBe('sepia')
+    expect(active.colorScheme).toBe('dark')
+    expect(active.tokens).toEqual({ '--dsw-alias-bg-base': 'red', '--dsw-alias-link': 'cyan' })
+  })
+
+  it('rejects palette ids outside the built-in set', () => {
+    const { theme, events, host } = make()
+    expect(() => { theme.setPalette('neon' as never) }).toThrow('not a built-in palette')
+    expect(events).toHaveLength(0)
+    expect(host.set).not.toHaveBeenCalled()
+  })
+
+  it('adopts a published Host palette without writing it back', () => {
+    const { theme, events, host } = make()
+    host.publish({ status: 'ready', value: { preference: 'system', fontSize: 14, palette: 'graphite' }, revision: 1, writable: true })
+    expect(theme.getTheme().palette).toBe('graphite')
     expect(events).toHaveLength(1)
     expect(host.set).not.toHaveBeenCalled()
   })
@@ -92,17 +162,17 @@ describe('ThemeRuntime', () => {
 
   it('adopts a published Host section without writing it back', () => {
     const { theme, events, host } = make()
-    host.publish({ status: 'ready', value: { preference: 'dark', fontSize: 14 }, revision: 1, writable: true })
+    host.publish({ status: 'ready', value: { preference: 'dark', fontSize: 14, palette: 'neutral' }, revision: 1, writable: true })
     expect(theme.getTheme().preference).toBe('dark')
     expect(events).toHaveLength(1)
     expect(host.set).not.toHaveBeenCalled()
-    host.publish({ value: { preference: 'dark', fontSize: 14 }, revision: 2 })
+    host.publish({ value: { preference: 'dark', fontSize: 14, palette: 'neutral' }, revision: 2 })
     expect(events).toHaveLength(1)
   })
 
   it('adopts a section already standing at construction', () => {
     const host = stubConfigForm<ThemeSettings>()
-    host.publish({ status: 'ready', value: { preference: 'dark', fontSize: 14 }, revision: 1, writable: true })
+    host.publish({ status: 'ready', value: { preference: 'dark', fontSize: 14, palette: 'neutral' }, revision: 1, writable: true })
     const { theme } = make(host)
     expect(theme.getTheme().preference).toBe('dark')
   })

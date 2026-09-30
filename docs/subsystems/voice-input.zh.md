@@ -24,7 +24,7 @@ Host Provider 在页面和 Session 变化期间拥有同一个准备任务。Cli
 
 准备失败时可包含 `SpeechDownloadFailure`，提供文件、下载源、原因分类以及可选错误码或 HTTP 状态。Client 将恢复建议本地化；原始下载错误留在 Host。
 
-麦克风占用模型选择器与发送按钮之间的 `conversation.input.activity`。点击开始录音并展开工具栏；停止后转写并插入草稿。活动栏保留编辑器与提交按钮，拥有局部反馈，并在卸载时释放展开状态。取消、Escape 或隐藏页面会丢弃录音。波形历史展示实测麦克风音量。Bundle 详情包含识别偏好、准备状态和进度。显式启用时通过 `plugins.bundle.activation` 引导缺少模型的用户前往安装；列表只显示 Bundle 描述和开关。
+麦克风占用 `conversation.input.activity`，叠放在发送按钮上方。点击开始录音并展开工具栏；停止后转写并插入草稿。活动栏保留编辑器与提交按钮，拥有局部反馈，并在卸载时释放展开状态。取消、Escape 或隐藏页面会丢弃录音。波形历史展示实测麦克风音量。Bundle 详情包含识别偏好、准备状态和进度。显式启用时通过 `plugins.bundle.activation` 引导缺少模型的用户前往安装；列表只显示 Bundle 描述和开关。
 
 ## 设计依据
 

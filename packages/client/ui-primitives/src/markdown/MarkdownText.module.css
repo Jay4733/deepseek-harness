@@ -226,10 +226,17 @@
 /* Many-column tables (the renderer's `md-table-wide` hook) keep their
    natural width and scroll inside the wrapper; a hosting layout may widen
    the wrapper through the hook (deepsuite chat TableWrapper parity). */
+/* Tables sit in a rounded hairline frame: separate borders let the corner
+   radius clip the header fill, and the frame stroke stays a flat 0.5px
+   border. */
 .tableScroll table {
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: max-content;
   max-width: max-content;
+  border: 0.5px solid var(--dsw-alias-border-l3);
+  border-radius: var(--dsw-radius-md);
+  overflow: hidden;
 }
 
 /* Tables under four columns, and any table inside a blockquote, fill the
@@ -243,9 +250,10 @@
 
 .tableScroll th {
   text-align: start;
-  padding: 10px 16px;
+  padding: 9px 14px;
   border-bottom: 0.5px solid var(--dsw-alias-border-l3);
   border-top: none;
+  background: var(--dsw-alias-interactive-bg-hover);
   font: var(--dsw-font-markdown-table-head);
   max-width: 320px;
   max-width: min(30vw, 320px);
@@ -253,7 +261,7 @@
 }
 
 .tableScroll td {
-  padding: 10px 16px;
+  padding: 9px 14px;
   border-bottom: 0.5px solid var(--dsw-alias-border-l2);
   font: var(--dsw-font-markdown-table);
   max-width: 320px;
@@ -261,13 +269,9 @@
   min-width: 100px;
 }
 
-.tableScroll th:first-child,
-.tableScroll td:first-child {
-  padding-left: 0;
-}
-
-.tableScroll td:last-child {
-  padding-right: 0;
+/* The frame draws the outer edge, so the last row needs no divider. */
+.tableScroll tr:last-child td {
+  border-bottom: none;
 }
 
 .tableScroll table code {

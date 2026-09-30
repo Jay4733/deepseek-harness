@@ -7,3 +7,9 @@
     - text: Acme Gateway
     - menuitemradio "Acme Think"
     - menuitemradio "Acme Swift" [checked]
+  - group "推理等级":
+    - text: 推理等级
+    - menuitemradio "Default"
+    - menuitemradio "Off"
+    - menuitemradio "High"
+    - menuitemradio "Max" [checked]

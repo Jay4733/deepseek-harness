@@ -41,6 +41,8 @@
   font-size: 26px;
   line-height: 32px;
   font-weight: 500;
+  /* Display-size text tightens its tracking slightly. */
+  letter-spacing: -0.01em;
   color: var(--dsw-alias-label-primary);
 }
 
@@ -85,13 +87,12 @@
 }
 
 /* The swim morph's curves poke slightly past the viewBox edges, so clipping
-   would slice the tail mid-wag. The hero mark stays in the same primary ink
-   as its headline. */
+   would slice the tail mid-wag. The hero mark takes the palette accent. */
 .fish {
   display: block;
   overflow: visible;
   transform-origin: 50% 60%;
-  color: var(--dsw-alias-label-primary);
+  color: var(--dsw-alias-state-business-primary);
 }
 
 /* Hover swim: a slow continuous sway about the body center — the head
@@ -132,6 +133,19 @@
 .body > * {
   position: relative;
   z-index: 1;
+}
+
+/* Decorative accent glow under the hero card: a blurred radial wash in the
+   palette's accent glow token, painted beneath the stacked children and
+   inert to the pointer. */
+.body::before {
+  content: '';
+  position: absolute;
+  inset: -40px -10% -80px;
+  z-index: 0;
+  background: radial-gradient(55% 60% at 50% 62%, var(--dsw-alias-accent-glow), transparent 72%);
+  filter: blur(28px);
+  pointer-events: none;
 }
 
 /* Must beat `.body > :not(.glow)` specificity so the open Menu (and its

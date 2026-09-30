@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import type { ThemePreference, ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
-import { DARK_ATTRIBUTE, THEME_SOURCE_ATTRIBUTE, ThemePresenter } from '@deepseek-ai/dsh-client-ui-layout/src/client/theme-presenter.ts'
+import type { ThemePalette, ThemePreference, ThemeSnapshot } from '@deepseek-ai/dsh-client-ui-theme/client'
+import {
+  DARK_ATTRIBUTE, PALETTE_ATTRIBUTE, THEME_SOURCE_ATTRIBUTE, ThemePresenter,
+} from '@deepseek-ai/dsh-client-ui-layout/src/client/theme-presenter.ts'
 
 const LIGHT_THEME_COLOR = 'rgb(255, 255, 255)'
 const DARK_THEME_COLOR = 'rgb(21, 21, 23)'
@@ -12,10 +14,12 @@ function snapshot(
   tokens: Record<string, string> = {},
   fontSize = 14,
   preference: ThemePreference = colorScheme,
+  palette: ThemePalette = 'classic',
+  paletteScheme: 'light' | 'dark' | null = null,
 ): ThemeSnapshot {
   // The presenter must key off colorScheme, not the id — keep them distinct.
   const active = { id: `${colorScheme}-test`, colorScheme, tokens }
-  return { preference, fontSize, active, themes: [active], revision: 1 }
+  return { preference, fontSize, palette, paletteScheme, active, themes: [active], revision: 1 }
 }
 
 function clearThemePresentation(): void {
@@ -31,6 +35,7 @@ beforeEach(() => {
   document.documentElement.style.removeProperty('color-scheme')
   document.documentElement.removeAttribute(THEME_SOURCE_ATTRIBUTE)
   document.body.removeAttribute(DARK_ATTRIBUTE)
+  document.body.removeAttribute(PALETTE_ATTRIBUTE)
   document.body.removeAttribute('style')
   const style = document.createElement('style')
   style.dataset.themePresenterTest = ''
@@ -65,6 +70,25 @@ describe('ThemePresenter', () => {
     expect(themeColorMeta()).toBe(meta)
     expect(meta?.content).toBe(LIGHT_THEME_COLOR)
     expect(document.head.querySelectorAll('meta[name="theme-color"]')).toHaveLength(1)
+  })
+
+  it('publishes the selected color palette on body and switches it in place', () => {
+    const presenter = new ThemePresenter()
+    presenter.apply(snapshot('dark', {}, 14, 'dark', 'neutral'))
+    expect(document.body.getAttribute(PALETTE_ATTRIBUTE)).toBe('neutral')
+    presenter.apply(snapshot('light', {}, 14, 'light', 'forest'))
+    expect(document.body.getAttribute(PALETTE_ATTRIBUTE)).toBe('forest')
+    presenter.dispose()
+    expect(document.body.hasAttribute(PALETTE_ATTRIBUTE)).toBe(false)
+  })
+
+  it('publishes a fixed palette scheme as the theme source even under the system preference', () => {
+    const presenter = new ThemePresenter()
+    presenter.apply(snapshot('dark', {}, 14, 'system', 'midnight', 'dark'))
+    expect(document.documentElement.getAttribute(THEME_SOURCE_ATTRIBUTE)).toBe('dark')
+    presenter.apply(snapshot('light', {}, 14, 'system', 'neutral'))
+    expect(document.documentElement.getAttribute(THEME_SOURCE_ATTRIBUTE)).toBe('system')
+    presenter.dispose()
   })
 
   it('applies tokens as inline variables and clears the previous set on theme change', () => {

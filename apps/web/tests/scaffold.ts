@@ -395,6 +395,12 @@ export interface LaunchOptions {
    * keyless first-run configuration lane; the default disables the adapter.
    */
   deepSeekMissingCredential?: boolean
+  /**
+   * Boot the shipped default color palette. Omitted, the scaffold selects the
+   * Classic palette, which leaves the base token sheets unrebound for the
+   * corpus's literal link, focus, menu, toast, and surface color assertions.
+   */
+  shippedPalette?: boolean
   /** Leave the current welcome notice pending; ordinary scenarios pre-acknowledge it before browser boot. */
   welcomeNoticePending?: boolean
   /** Leave first-use Workspace initialization eligible; ordinary scenarios start after the default was removed. */
@@ -571,6 +577,7 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
     ...mode === 'record' || options.deepSeekMissingCredential === true
       ? []
       : [{ id: 'agent-default-model', config: { provider: 'deepseek-official', model: 'deepseek-v4-flash' } }],
+    ...options.shippedPalette === true ? [] : [{ id: 'ui-theme', config: { palette: 'classic' } }],
     ...extraOverlayPatches,
     { id: 'agent-preset-registry', config: { default: 'standard' } },
     { id: 'session-persistence-jsonl', config: { root: persistenceRoot } },

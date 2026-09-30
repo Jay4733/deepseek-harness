@@ -1,23 +1,23 @@
 /**
  * ModelSelect: the composer's named model seat (`conversation.input.model`).
- * Two-level selection per figma 496:26454's MenuDropdown: the root menu is
- * the Model / Effort row pair (label + current value + a right chevron),
- * each drilling into its own list — the provider-grouped model list over
- * the shared directory, and the effort levels. The trigger (313:14108's
+ * One menu holds the whole selection: the provider-grouped model list over
+ * the shared directory, then, when the current model advertises reasoning
+ * metadata, a row of effort segments below it. The trigger (313:14108's
  * ToggleButton) shows both: model name + effort in the caption tone.
- * While open, ↑/↓ move focus across the rows of the shown pane (wrapping; a
- * step taken while the trigger still holds focus enters at the near end), Tab
- * settles like Enter, and Escape and Shift+Tab leave a drilled pane first and
- * otherwise close back to the trigger. A drilled pane hands focus to the row
- * of the value in use, and returning to the root pane hands it back to the
- * cell that opened it. Data and submission ride the SAME per-session
- * ModelDirectory as the /model popup; exact-model reasoning metadata and the
- * selected effort come from the Host rather than a client-owned vocabulary. A
- * rejected selection announces through the shared transient Toast anchored to
- * the composer card; the in-menu strip with Retry remains the catalog-load
- * surface. While the directory's pending selection is unsettled, the trigger
- * shows a spinner in place of its chevron, and each row whose value that
- * selection carries shows one in place of its check mark.
+ * While open, ↑/↓ move focus across every row and segment (wrapping; a step
+ * taken while the trigger still holds focus enters at the near end), ←/→
+ * move between effort segments, Tab settles the focused row or segment and
+ * closes, and Escape and Shift+Tab close back to the trigger. Choosing a
+ * model closes the menu once the selection settles; choosing an effort by
+ * pointer or Enter keeps it open on the newly checked segment. Data and
+ * submission ride the SAME per-session ModelDirectory as the /model popup;
+ * exact-model reasoning metadata and the selected effort come from the Host
+ * rather than a client-owned vocabulary. A rejected selection announces
+ * through the shared transient Toast anchored to the composer card; the
+ * in-menu strip with Retry remains the catalog-load surface. While the
+ * directory's pending selection is unsettled, the trigger shows a spinner in
+ * place of its chevron, and each row or segment whose value that selection
+ * carries shows one in place of its check mark.
  */
 import { MenuSurface } from '@deepseek-ai/dsh-client-ui-primitives'
 import {
@@ -28,22 +28,22 @@ import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import type { ModelReasoningEffort, ModelSelection } from '@deepseek-ai/dsh-api-remotes/client'
 import {
-  IconCheckOutlineRegular, IconChevronDownOutlineRegular, IconChevronRightOutlineRegular,
+  IconCheckOutlineRegular, IconChevronDownOutlineRegular,
   IconDataOutlineRegular, IconWarningOutlineRegular, StateDot, Toast,
 } from '@deepseek-ai/dsh-client-ui-primitives'
 import type { PropsLocale } from '@deepseek-ai/dsh-client-ui-slots'
 import type { ModelSelectInjected } from './slots.ts'
 import css from './ModelSelect.module.css'
 
-/** Which pane the dropdown shows: the two-row root or one drilled-in list. */
-type Pane = 'root' | 'model' | 'effort'
-
-/** One dynamic effort row; undefined means preserve the provider default. */
+/** One dynamic effort segment; undefined means preserve the provider default. */
 interface EffortChoice {
   key: string
   effort: string | undefined
   label: string
 }
+
+/** Attribute marking an effort segment among the menu's focusable rows. */
+const EFFORT_SEGMENT = 'data-effort-segment'
 
 /** Unplaced portal card: hidden but laid out at a fixed origin so offsetWidth/offsetHeight are real (Menu primitive's measure pass). */
 const MEASURE_STYLE: CSSProperties = { visibility: 'hidden', left: 0, top: 0 }
@@ -52,7 +52,7 @@ const MEASURE_STYLE: CSSProperties = { visibility: 'hidden', left: 0, top: 0 }
  * Render the composer model seat.
  * @param props - owner share (locked) + injected face (shared directory
  * store/verbs) + the standard locale seat.
- * @returns the trigger and, while open, the two-level menu.
+ * @returns the trigger and, while open, the model and effort menu.
  */
 export function ModelSelect(
   { locked, available, directory, load, select, t }:
@@ -63,7 +63,6 @@ export function ModelSelect(
     () => directory.getSnapshot(),
   )
   const [open, setOpen] = useState(false)
-  const [pane, setPane] = useState<Pane>('root')
   // The in-menu error strip serves catalog loads (its Retry re-runs the
   // load); a rejected SELECTION announces through the transient toast
   // instead, so the strip renders only while the latest failure-capable
@@ -76,6 +75,9 @@ export function ModelSelect(
   const menuRef = useRef<HTMLDivElement | null>(null)
   const [menuPos, setMenuPos] = useState<CSSProperties | null>(null)
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([])
+  // Set by Tab just before it activates a segment, so that one effort choice
+  // closes the menu like every other Tab settle.
+  const tabSettle = useRef(false)
   const id = useId()
 
   const groups = useMemo(() => state.groups.toSorted((left, right) =>
@@ -118,6 +120,12 @@ export function ModelSelect(
     ], [reasoning, t])
   const { pending } = state
   const busy = pending !== null
+  // A pending selection on the current model only changes its effort, so only
+  // the effort segment spins; a model row spins when the selection switches to it.
+  const pendingModel = pending !== null
+    && (pending.provider !== state.current?.provider || pending.model !== state.current.model)
+    ? pending
+    : null
 
   const reload = (): void => {
     lastActionRef.current = 'load'
@@ -136,34 +144,24 @@ export function ModelSelect(
     return () => { document.removeEventListener('mousedown', closeOutside) }
   }, [open])
 
-  // A pane switch unmounts the row that had focus, which drops focus onto the
-  // page body — outside the card's subtree, where its key handling no longer
-  // sees a keystroke. Every switch therefore names where the keyboard lands:
-  // drilling on the pane's current value, coming back on the cell that opened
-  // the pane left.
-  const paneFocus = useRef<'drill' | 'model' | 'effort' | null>(null)
+  // An unselected trigger opens straight onto the rows: the keyboard lands on
+  // the checked row, or the first one when none is checked. With a current
+  // model the trigger keeps focus until the first ↑/↓ or Tab.
+  const focusRows = useRef(false)
   useEffect(() => {
-    const intent = paneFocus.current
-    paneFocus.current = null
-    if (!open || intent === null) return
-    if (intent === 'drill') {
-      // The checked row is the value in use; a pane without one opens on its
-      // first row.
-      const checked = menuRef.current?.querySelector<HTMLElement>('[role="menuitemradio"][aria-checked="true"]:not([disabled])')
-      const target = checked ?? itemRefs.current.find(item => item !== null && !item.disabled)
-      // Rows a selection in flight disabled cannot take the keyboard; the
-      // trigger does, so the card's keys still reach the menu.
-      ;(target ?? triggerRef.current)?.focus()
-      return
-    }
-    const cell = itemRefs.current[intent === 'effort' ? 1 : 0]
-    ;(cell !== null && cell !== undefined && !cell.disabled ? cell : triggerRef.current)?.focus()
-  }, [open, pane])
+    if (!open || !focusRows.current) return
+    focusRows.current = false
+    const checked = menuRef.current?.querySelector<HTMLElement>('[role="menuitemradio"][aria-checked="true"]:not([disabled])')
+    const target = checked ?? itemRefs.current.find(item => item !== null && !item.disabled)
+    // Rows a selection in flight disabled cannot take the keyboard; the
+    // trigger does, so the card's keys still reach the menu.
+    ;(target ?? triggerRef.current)?.focus()
+  }, [open])
 
   // Portaled placement (the Menu primitive's portal rules: fixed from the
   // anchor rect, measured before paint, clamped inside the viewport): above
-  // the trigger, right edges aligned. Depends on pane and directory state
-  // because pane switches and async catalog loads resize the card.
+  // the trigger, right edges aligned. Depends on directory state because
+  // async catalog loads and effort availability resize the card.
   /* jscpd:ignore-start -- deliberate mirror of ui-primitives useAnchoredPosition:
      that hook only places from the anchor's LEFT edge, while this card aligns
      right edges (x = rect.right - width), so the measure-and-clamp plumbing repeats. */
@@ -191,34 +189,21 @@ export function ModelSelect(
       window.removeEventListener('scroll', place, true)
       window.removeEventListener('resize', place)
     }
-  }, [open, pane, state])
+  }, [open, state])
   /* jscpd:ignore-end */
 
   if (!available) return null
 
   const show = (): void => {
     triggerRef.current?.focus()
-    if (state.current === null) paneFocus.current = 'drill'
-    setPane(state.current === null ? 'model' : 'root')
+    if (state.current === null) focusRows.current = true
     setOpen(true)
     reload()
   }
 
   const close = (restoreFocus = false): void => {
     setOpen(false)
-    setPane('root')
     if (restoreFocus) queueMicrotask(() => { triggerRef.current?.focus() })
-  }
-
-  const drill = (next: Pane): void => {
-    paneFocus.current = 'drill'
-    setPane(next)
-  }
-
-  /** Leave a drilled pane for the root one, handing the keyboard back to its cell. */
-  const back = (from: Exclude<Pane, 'root'>): void => {
-    paneFocus.current = from
-    setPane('root')
   }
 
   const moveFocus = (offset: number): void => {
@@ -234,12 +219,21 @@ export function ModelSelect(
     items[next]?.focus()
   }
 
+  /** Step between effort segments, wrapping, when one holds focus. */
+  const moveSegment = (offset: number): boolean => {
+    const focused = document.activeElement
+    if (!(focused instanceof HTMLElement) || !focused.hasAttribute(EFFORT_SEGMENT)) return false
+    const segments = itemRefs.current.filter(
+      (item): item is HTMLButtonElement => item !== null && item.hasAttribute(EFFORT_SEGMENT))
+    const at = segments.findIndex(segment => segment === focused)
+    segments[(at + offset + segments.length) % segments.length]?.focus()
+    return true
+  }
+
   const onRootKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
     if (event.key === 'Escape' && open) {
       event.preventDefault()
-      // Escape backs out of a drilled pane first, then closes.
-      if (pane !== 'root' && state.current !== null) back(pane)
-      else close(true)
+      close(true)
       return
     }
     if (!open) return
@@ -249,8 +243,7 @@ export function ModelSelect(
     if (event.key === 'Tab') {
       if (event.shiftKey) {
         event.preventDefault()
-        if (pane !== 'root' && state.current !== null) back(pane)
-        else close(true)
+        close(true)
         return
       }
       // Settling activates the row the keyboard is on; with focus still on the
@@ -261,6 +254,7 @@ export function ModelSelect(
       const rows = itemRefs.current.filter((item): item is HTMLButtonElement => item !== null)
       if (focused instanceof HTMLButtonElement && rows.includes(focused)) {
         event.preventDefault()
+        tabSettle.current = focused.hasAttribute(EFFORT_SEGMENT)
         focused.click()
         return
       }
@@ -273,6 +267,11 @@ export function ModelSelect(
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault()
       moveFocus(event.key === 'ArrowDown' ? 1 : -1)
+      return
+    }
+    if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+      && moveSegment(event.key === 'ArrowRight' ? 1 : -1)) {
+      event.preventDefault()
     }
   }
 
@@ -284,10 +283,21 @@ export function ModelSelect(
     close()
   }
 
-  const settleSelection = (result: Awaited<ReturnType<ModelSelectInjected['select']>>): void => {
+  const settleSelection = (
+    result: Awaited<ReturnType<ModelSelectInjected['select']>>,
+    closeOnSuccess: boolean,
+  ): void => {
     if (result === undefined) return
     if (result.ok) {
-      if (rootRef.current !== null) close(true)
+      if (rootRef.current === null) return
+      if (closeOnSuccess) {
+        close(true)
+        return
+      }
+      // The menu stays open: the keyboard returns to the segment now checked.
+      queueMicrotask(() => {
+        menuRef.current?.querySelector<HTMLElement>(`[${EFFORT_SEGMENT}][aria-checked="true"]`)?.focus()
+      })
       return
     }
     const { error } = result
@@ -300,11 +310,11 @@ export function ModelSelect(
     })
   }
 
-  const submit = (selection: ModelSelection): void => {
+  const submit = (selection: ModelSelection, closeOnSuccess: boolean): void => {
     lastActionRef.current = 'select'
     // Disabled option rows cannot retain focus while a selection is pending.
     triggerRef.current?.focus()
-    void select(selection).then(settleSelection)
+    void select(selection).then((result) => { settleSelection(result, closeOnSuccess) })
   }
 
   const choose = (selection: ModelSelection): void => {
@@ -312,13 +322,15 @@ export function ModelSelect(
       close(true)
       return
     }
-    submit(selection)
+    submit(selection, true)
   }
 
   const chooseEffort = (effort: string | undefined): void => {
+    const settle = tabSettle.current
+    tabSettle.current = false
     if (state.current === null) return
     if (effectiveEffort === effort) {
-      close(true)
+      if (settle) close(true)
       return
     }
     const selection: ModelSelection = {
@@ -326,7 +338,7 @@ export function ModelSelect(
       model: state.current.model,
       ...effort === undefined ? {} : { reasoningEffort: effort },
     }
-    submit(selection)
+    submit(selection, settle)
   }
 
   const waiting = state.current === null && state.status === 'loading'
@@ -400,114 +412,91 @@ export function ModelSelect(
           aria-label={t('menu.aria')}
           aria-busy={state.status === 'loading' || busy}
         >
-          {pane === 'root' && (
-            <>
-              <button ref={itemRef()} type="button" role="menuitem" className={css.cell} onClick={() => { drill('model') }}>
-                <span className={css.cellLabel}>{t('menu.model')}</span>
-                <span className={css.cellValue}>{modelLabel}</span>
-                <IconChevronRightOutlineRegular className={css.cellChevron} />
-              </button>
-              {reasoning !== undefined && (
-                <button ref={itemRef()} type="button" role="menuitem" className={css.cell} onClick={() => { drill('effort') }}>
-                  <span className={css.cellLabel}>{t('menu.effort')}</span>
-                  <span className={css.cellValue}>{effortLabel}</span>
-                  <IconChevronRightOutlineRegular className={css.cellChevron} />
-                </button>
-              )}
-            </>
+          {state.status === 'loading' && (
+            <div className={css.status}>{t('status.loading')}</div>
+          )}
+          {state.error !== null && lastActionRef.current === 'load' && (
+            <div className={css.error}>
+              <span>{t('error.action', { message: state.error })}</span>
+              <button type="button" className={css.retry} onClick={reload}>{t('retry')}</button>
+            </div>
+          )}
+          {state.failures.map(failure => (
+            <div className={css.warning} key={failure.id}>
+              <span>{t('warning.groupLoad', { name: failure.id === 'deepseek-account' ? t('provider.account') : failure.name, message: failure.message })}</span>
+              <button type="button" className={css.retry} onClick={reload}>{t('retry')}</button>
+            </div>
+          ))}
+          <div className={clsx(css.groups, 'scrollable')}>
+            {groups.map((group) => {
+              const headingId = `${id}-${group.id}`
+              return (
+                <section role="group" aria-labelledby={headingId} className={css.group} key={group.id}>
+                  <div className={css.groupTitle} id={headingId}>{group.id === 'deepseek-account' ? t('provider.account') : group.name}</div>
+                  {group.models.map((model) => {
+                    const selected = state.current?.provider === group.id && state.current.model === model.id
+                    return (
+                      <button
+                        ref={itemRef()}
+                        type="button"
+                        role="menuitemradio"
+                        aria-checked={selected}
+                        className={clsx(css.option, selected && css.selected)}
+                        key={model.id}
+                        title={model.name}
+                        disabled={busy}
+                        onClick={() => { choose({ provider: group.id, model: model.id }) }}
+                      >
+                        <span className={css.optionCopy}>
+                          <span className={css.modelName}>{model.name}</span>
+                        </span>
+                        <span className={css.check}>
+                          {pendingModel?.provider === group.id && pendingModel.model === model.id
+                            ? <StateDot state="ongoing" />
+                            : selected ? <IconCheckOutlineRegular /> : null}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </section>
+              )
+            })}
+          </div>
+          {state.status === 'ready' && choices.length === 0 && (
+            <div className={css.empty}>{t('empty.models')}</div>
           )}
 
-          {pane === 'model' && (
-            <>
-              {state.status === 'loading' && (
-                <div className={css.status}>{t('status.loading')}</div>
-              )}
-              {state.error !== null && lastActionRef.current === 'load' && (
-                <div className={css.error}>
-                  <span>{t('error.action', { message: state.error })}</span>
-                  <button type="button" className={css.retry} onClick={reload}>{t('retry')}</button>
-                </div>
-              )}
-              {state.failures.map(failure => (
-                <div className={css.warning} key={failure.id}>
-                  <span>{t('warning.groupLoad', { name: failure.id === 'deepseek-account' ? t('provider.account') : failure.name, message: failure.message })}</span>
-                  <button type="button" className={css.retry} onClick={reload}>{t('retry')}</button>
-                </div>
-              ))}
-              <div className={clsx(css.groups, 'scrollable')}>
-                {groups.map((group) => {
-                  const headingId = `${id}-${group.id}`
-                  return (
-                    <section role="group" aria-labelledby={headingId} className={css.group} key={group.id}>
-                      <div className={css.groupTitle} id={headingId}>{group.id === 'deepseek-account' ? t('provider.account') : group.name}</div>
-                      {group.models.map((model) => {
-                        const selected = state.current?.provider === group.id && state.current.model === model.id
-                        return (
-                          <button
-                            ref={itemRef()}
-                            type="button"
-                            role="menuitemradio"
-                            aria-checked={selected}
-                            className={clsx(css.option, selected && css.selected)}
-                            key={model.id}
-                            title={model.name}
-                            disabled={busy}
-                            onClick={() => { choose({ provider: group.id, model: model.id }) }}
-                          >
-                            <span className={css.optionCopy}>
-                              <span className={css.modelName}>{model.name}</span>
-                            </span>
-                            <span className={css.check}>
-                              {pending?.provider === group.id && pending.model === model.id
-                                ? <StateDot state="ongoing" />
-                                : selected ? <IconCheckOutlineRegular /> : null}
-                            </span>
-                          </button>
-                        )
-                      })}
-                    </section>
-                  )
-                })}
-              </div>
-              {state.status === 'ready' && choices.length === 0 && (
-                <div className={css.empty}>{t('empty.models')}</div>
-              )}
-            </>
-          )}
-
-          {pane === 'effort' && (
-            <>
-              {state.error !== null && lastActionRef.current === 'load' && (
-                <div className={css.error}>
-                  <span>{t('error.action', { message: state.error })}</span>
-                  <button type="button" className={css.retry} onClick={reload}>{t('action.reload')}</button>
-                </div>
-              )}
+          {reasoning !== undefined && (
+            <section role="group" aria-labelledby={`${id}-effort`} className={css.effort}>
+              <div className={css.effortTitle} id={`${id}-effort`}>{t('menu.effort')}</div>
               {effortChoices.length === 0
                 ? <div className={css.empty}>{t('empty.efforts')}</div>
-                : effortChoices.map(level => (
-                  <button
-                    ref={itemRef()}
-                    type="button"
-                    role="menuitemradio"
-                    aria-checked={effectiveEffort === level.effort}
-                    className={clsx(css.option, effectiveEffort === level.effort && css.selected)}
-                    key={level.key}
-                    disabled={busy}
-                    onClick={() => { chooseEffort(level.effort) }}
-                  >
-                    <span className={css.optionCopy}>
-                      <span className={css.modelName}>{level.label}</span>
-                    </span>
-                    <span className={css.check}>
-                      {pending !== null && pending.provider === state.current?.provider
-                        && pending.model === state.current.model && pending.reasoningEffort === level.effort
-                        ? <StateDot state="ongoing" />
-                        : effectiveEffort === level.effort ? <IconCheckOutlineRegular /> : null}
-                    </span>
-                  </button>
-                ))}
-            </>
+                : (
+                  <div className={css.segments}>
+                    {effortChoices.map((level) => {
+                      const checked = effectiveEffort === level.effort
+                      return (
+                        <button
+                          ref={itemRef()}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={checked}
+                          {...{ [EFFORT_SEGMENT]: '' }}
+                          className={clsx(css.segment, checked && css.segmentChecked)}
+                          key={level.key}
+                          disabled={busy}
+                          onClick={() => { chooseEffort(level.effort) }}
+                        >
+                          {pending !== null && pending.provider === state.current?.provider
+                            && pending.model === state.current.model && pending.reasoningEffort === level.effort
+                            && <StateDot state="ongoing" />}
+                          <span className={css.segmentLabel}>{level.label}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+            </section>
           )}
         </MenuSurface>,
         document.body,

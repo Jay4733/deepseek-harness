@@ -3,3 +3,9 @@
     - text: DeepSeek
     - menuitemradio "Messages Flash" [checked]
     - menuitemradio "DeepSeek-V4-Pro"
+  - group "推理等级":
+    - text: 推理等级
+    - menuitemradio "Off"
+    - menuitemradio "Low"
+    - menuitemradio "High" [checked]
+    - menuitemradio "Max"

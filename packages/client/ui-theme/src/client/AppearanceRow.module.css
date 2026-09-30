@@ -55,3 +55,155 @@
   background: var(--dsw-alias-bg-module-platform);
   border-color: var(--dsw-static-neutral-bluish-400);
 }
+
+.paletteHeading {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.subtitle {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 20px;
+  color: var(--dsw-alias-label-secondary);
+}
+
+.hint {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
+
+/* Palette cards: two rows of four in the 800 panel, wrapping to fewer
+   columns when narrower. */
+.paletteGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+/* The card reads its preview colors from component-local custom properties
+   set inline per palette; the light set applies until the dark base palette
+   is active. */
+.paletteCard {
+  --palette-bg: var(--palette-light-bg);
+  --palette-surface: var(--palette-light-surface);
+  --palette-ink: var(--palette-light-ink);
+  --palette-accent: var(--palette-light-accent);
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 6px 6px 8px;
+  border: 0.5px solid var(--dsw-alias-border-l4);
+  border-radius: var(--dsw-radius-md);
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--dsw-alias-label-primary);
+  cursor: pointer;
+  transition: box-shadow var(--ds-transition-duration-fast) var(--ds-ease-in-out);
+}
+
+:global(body[data-ds-dark-theme]) .paletteCard {
+  --palette-bg: var(--palette-dark-bg);
+  --palette-surface: var(--palette-dark-surface);
+  --palette-ink: var(--palette-dark-ink);
+  --palette-accent: var(--palette-dark-accent);
+}
+
+.paletteCard:hover:not(.selected) {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+/* Selected palette card: a 2px ring in the active accent, drawn as a state
+   border rather than an elevation stroke. */
+.paletteCard.selected {
+  border-color: transparent;
+  background: var(--dsw-alias-bg-module-platform);
+  box-shadow: 0 0 0 2px var(--dsw-alias-state-business-primary);
+}
+
+/* Miniature of the chat surface: two text lines over a composer pill with
+   its send dot. */
+.preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  height: 56px;
+  padding: 10px;
+  box-sizing: border-box;
+  border-radius: var(--dsw-radius-sm);
+  background: var(--palette-bg);
+  box-shadow: inset 0 0 0 0.5px color-mix(in srgb, var(--palette-ink) 14%, transparent);
+  overflow: hidden;
+}
+
+.previewLine,
+.previewLineShort {
+  height: 4px;
+  border-radius: 999px;
+  corner-shape: round;
+  background: color-mix(in srgb, var(--palette-ink) 55%, transparent);
+}
+
+.previewLine {
+  width: 72%;
+}
+
+.previewLineShort {
+  width: 44%;
+  background: color-mix(in srgb, var(--palette-ink) 30%, transparent);
+}
+
+.previewComposer {
+  position: absolute;
+  inset: auto 6px 6px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  height: 16px;
+  padding: 0 3px;
+  border-radius: 999px;
+  corner-shape: round;
+  background: var(--palette-surface);
+  box-shadow: 0 0 0 0.5px color-mix(in srgb, var(--palette-ink) 16%, transparent);
+}
+
+.previewSend {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  corner-shape: round;
+  background: var(--palette-accent);
+}
+
+/* Name at the start, and a fixed palette's Light or Dark tag at the end. */
+.paletteLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px;
+  min-width: 0;
+  padding: 0 2px;
+}
+
+.paletteName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.paletteTag {
+  flex: none;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-tertiary);
+}
